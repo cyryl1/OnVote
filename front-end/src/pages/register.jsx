@@ -26,10 +26,31 @@ export default function Register() {
 
         if (Object.keys(newErrors).length === 0) {
             console.log('Form submitted successfully!');
+            handleSignup(formData);
         } else {
             console.log('Form submission failed');
         }
     };
+
+    const handleSignup = async(form) => {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/onvote/register', {
+                method: 'POST',
+                body: form,
+            });
+
+            if (!response.ok) {
+                throw new Error('SignUp failed');
+            }
+
+            const result = await response.json();
+            console.log(result)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    
 
     const validateForm = (data) => {
         const errors = {};
