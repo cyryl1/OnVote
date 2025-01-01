@@ -5,27 +5,31 @@ from app.services.auth_service import AuthService
 from app.models import Admin
 from app.models import Election
 from datetime import datetime
+from flask_cors import cross_origin
+
 
 
 @bp.route('/register', methods=['POST'])
+@cross_origin()
 def register():
-    data = request.get_json()
+    print(request.form)
+    # data = request.form
 
-    admin = Admin.query.filter_by(email=data.get('email')).first()
+    admin = Admin.query.filter_by(email=request.form.get('email')).first()
     if admin:
-        return jsonify({"error": "User already exist, Login instead"}), 403
+        return jsonify({"message": "User already exist, Login instead"}), 403
     
     admin = Admin(
-        name=data.get('name'),
-        email=data.get('email')
+        name=request.form.get('name'),
+        email=request.form.get('email')
     )
 
-    admin.set_password(data.get('password'))
+    admin.set_password(request.form.get('password'))
 
     admin.save()
 
     return jsonify({
-        "message": "User registered",
+        "message": "Sign Up successful, now login",
         "id": admin.id
     }), 201
 
@@ -38,7 +42,7 @@ def login():
     admin = Admin.query.filter_by(email=email).first()
     if not admin:
         return jsonify({
-            "error": "User nor found"
+            "message": "User not found"
         }), 404
     check_password = admin.check_password(password)
     if admin and check_password:
@@ -49,7 +53,7 @@ def login():
                 "refresh": create_refresh_token(identity=admin.email)
             }
         }), 200
-    return jsonify({"error": "Invalid email or password"}), 400
+    return jsonify({"message": "Invalid email or password. Try again!"}), 400
 
 @bp.delete('/auth/delete')
 @jwt_required()
@@ -58,7 +62,7 @@ def delete():
     email = data.get('email')
     admin = Admin.query.filter_by(email=email).first()
     if not admin:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"message": "User not found"}), 404
     admin.delete()
     return jsonify({"message": "User deleted"}), 200
 
@@ -76,7 +80,7 @@ def update():
         admin.save()
 
         return jsonify({"message": "profile update successfully"}), 201
-    return jsonify({"error": "Not authorized"}), 403
+    return jsonify({"message": "Not authorized"}), 403
 
 @bp.get('/auth/profile')
 @jwt_required()

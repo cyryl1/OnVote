@@ -1,10 +1,14 @@
 // import React from 'react'
 import Logo from '../assets/onvote-high-resolution-logo.svg';
+// import { Link} from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { TokenContext } from '../context/AuthContext';
 
 
 export default function Register() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -13,16 +17,53 @@ export default function Register() {
     });
     
     const [errors, setErrors] = useState({});
+    const { setName } = useContext(TokenContext);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({...formData, [name]: value });
     };
 
+    const handleSignup = async(form) => {
+        try {
+            const formEncoded = new URLSearchParams();
+            for (const key in form) {
+                formEncoded.append(key, form[key]);;
+            }
+
+            const response = await fetch('http://127.0.0.1:5000/onvote/register', {
+                method: "POST",
+                body: formEncoded,
+            });
+
+            // if (!response.ok) {
+            //     throw new Error('SignUp failed');
+            // }
+            const result = await response.json();
+            if (response.status === 201) {
+                alert(result.message)
+                setName(form.name);
+                // setRedirect(true)
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+                
+                // window.location.href='/login';
+            }
+            if (response.status === 403) {
+                alert(result.message)
+            }
+            console.log(result)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = validateForm(formData);
         setErrors(newErrors);
+        console.log(formData)
 
         if (Object.keys(newErrors).length === 0) {
             console.log('Form submitted successfully!');
@@ -31,24 +72,6 @@ export default function Register() {
             console.log('Form submission failed');
         }
     };
-
-    const handleSignup = async(form) => {
-        try {
-            const response = await fetch('http://127.0.0.1:5000/onvote/register', {
-                method: 'POST',
-                body: form,
-            });
-
-            if (!response.ok) {
-                throw new Error('SignUp failed');
-            }
-
-            const result = await response.json();
-            console.log(result)
-        } catch (error) {
-            console.error(error)
-        }
-    }
 
     
 

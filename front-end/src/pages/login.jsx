@@ -1,9 +1,14 @@
 // import React from 'react'
 import Logo from '../assets/onvote-high-resolution-logo.svg';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { TokenContext } from '../context/AuthContext';
 
 export default function Login() {
+    // const [accessToken, setAccessToken] = useState('');
+    // const [resetToken, setResetToken] = useState('');
+    const { setTokens } = useContext(TokenContext);
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -15,14 +20,49 @@ export default function Login() {
         const { name, value } = e.target;
         setFormData({...formData, [name]: value});
     };
+
+    const handleLogin = async (form)=> {
+        try {
+            const formEncoded = URLSearchParams(form);
+            for (const key in form) {
+                formEncoded.append(key, form[key]);
+            }
+
+            const response = await fetch('http://127.0.0.1:5000/onvote/login', {
+                method: 'POST',
+                body: formEncoded
+            })
+
+            const result = await response.json();
+            if (response.status === 200) {
+                alert(result.message);
+                setTokens({
+                    accessToken: result.tokens.access,
+                    resetToken: result.tokens.reset
+                });
+                setTimeout(() => {
+                    navigate('/dashboard');
+                }, 1000);
+            }
+
+            if (response.status === 404) {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
     
     const handleSubmit = (e) => {
         e.preventDefault();
         const newErrors = validateForm(formData);
         setErrors(newErrors);
+        console.log(formData);
 
         if (Object.keys(newErrors).length === 0) {
             console.log("Form submitted successfully");
+            handleLogin(formData);
+            console.log(formData);
         } else {
             console.log("Form submission failed");
         }

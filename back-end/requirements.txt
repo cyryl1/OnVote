@@ -4,4 +4,4 @@ flask-socketio
 flask-sqlalchemy
 flask-bcrypt
 python-dotenv
-flask_cors
+flask-cors

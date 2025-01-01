@@ -9,8 +9,10 @@ from app.models import db
 def create_app(config_class=Config):
     load_dotenv()  # Load environment variables from.env file
     app = Flask(__name__)
+    # CORS(app)
+    # CORS(app, origins=["http://localhost:5173"])
+    CORS(app, resources={r"/onvote/*": {"origins": "http://localhost:5173"}})
     app.config.from_object(config_class)
-    CORS(app)
 
     db.init_app(app)
     with app.app_context():
