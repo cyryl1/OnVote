@@ -5,12 +5,15 @@ import { TokenContext } from "../context/AuthContext";
 import { IoMdSettings } from "react-icons/io";
 import { MdDateRange } from "react-icons/md";
 import { RiDeleteBin6Line } from "react-icons/ri";
+// import { Navigate } from "react-router-dom";
 
 
 export default function Settings() {
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const { electionDetails } = useContext(TokenContext);
+    const [settings, setSettings] = useState(null);
+    // const navigate = Navigate();
     
 
     const handleButtonChange = () => {
@@ -28,7 +31,7 @@ export default function Settings() {
       end_date: ''
     })
 
-    const handlegeneralChange = (e) => {
+    const handleGeneralChange = (e) => {
       const { name,  value } = e.target;
       setGeneralFormData({ ...generalFormData, [name]: value });
     }
@@ -36,6 +39,21 @@ export default function Settings() {
     const handleDateChange = (e) => {
       const { name, value } = e.target;
       setDateFormData({ ...dateFormData, [name]: value })
+    }
+
+    const handleSaveSettings = (e) => {
+      e.preventDefault();
+      if (settings === 'general') {
+        // Save general settings here
+      }
+      if (settings === 'date') {
+        // Save date settings here
+      }
+
+      if (settings === 'delete') {
+        // Delete election here
+        // navigate('/overview');
+      }
     }
 
     return (
@@ -67,7 +85,7 @@ export default function Settings() {
                   <input
                     type="text" 
                     name="title" 
-                    onChange={handlegeneralChange}
+                    onChange={handleGeneralChange}
                     className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" 
                     defaultValue={electionDetails.title || "Election name"} 
                   />
@@ -78,26 +96,44 @@ export default function Settings() {
                   <textarea 
                     rows={10} 
                     name="description" 
-                    onChange={handlegeneralChange}
+                    onChange={handleGeneralChange}
                     className="bg-[#f6f8fa] border-[#ced4da]" 
                     id=""></textarea>
                 </div>
-                <button type="submit" className="bg-[#2ecd10] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] rounded">Save</button>
+                <button 
+                  type="submit" 
+                  className="bg-[#2ecd10] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] rounded"
+                  onClick={() => {
+                    setSettings('general');
+                    handleSaveSettings;
+                  }}
+                >
+                  Save
+                </button>
               </form>
             </div>
             <div className="dates mt-[1rem] bg-white border w-[90%]">
               <div className="flex items-center gap-1 text-[1.2rem] px-[1rem] py-[0.5rem] border border-t-0 border-l-0 border-r-0"><MdDateRange /> Election Dates</div>
               <form action="" className="px-[1rem] py-[1rem]">
                 <div className="form-group flex flex-col gap-1">
-                  <label htmlFor="title" className="font-bold text-[0.8rem]">Start Date</label>
-                  <input type="datetime-local" className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" defaultValue={electionDetails.start_date || "Election start_date"} />
+                  <label htmlFor="start_date" className="font-bold text-[0.8rem]">Start Date</label>
+                  <input type="datetime-local" name="start_date" className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" onChange={handleDateChange} defaultValue={electionDetails.start_date || "Election start_date"} />
                 </div>
 
                 <div className="form-group flex flex-col gap-1 mt-[1rem]">
-                  <label htmlFor="description" className="font-bold text-[0.8rem]">End Date</label>
-                  <input type="datetime-local" className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" defaultValue={electionDetails.end_date || "Election end_date"} />
+                  <label htmlFor="end_date" className="font-bold text-[0.8rem]">End Date</label>
+                  <input type="datetime-local" name="end_date" className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" onChange={handleDateChange} defaultValue={electionDetails.end_date || "Election end_date"} />
                 </div>
-                <button type="submit" className="bg-[#2ecd10] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] rounded">Save</button>
+                <button 
+                  type="submit" 
+                  className="bg-[#2ecd10] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] rounded"
+                  onClick={() => {
+                    setSettings('date');
+                    handleSaveSettings;
+                  }}
+                >
+                  Save
+                </button>
               </form>
             </div>
             <div className="delete mt-[1rem] bg-white border w-[90%]">
@@ -110,7 +146,16 @@ export default function Settings() {
                 This action is not reversible. Please contact support
                 if you need to make a change to an election that has already launched.
               </div>
-              <button type="submit" className="bg-[#ff0000] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] ml-[1rem] mb-[1rem] rounded">Delete Election</button>
+              <button 
+                type="submit" 
+                className="bg-[#ff0000] text-[#fff] font-bold px-[1rem] py-[0.5rem] mt-[2rem] ml-[1rem] mb-[1rem] rounded"
+                onClick={() => {
+                  setSettings('delete');
+                  handleSaveSettings;
+                }}
+              >
+                Delete Election
+              </button>
             </div>
           </div>
         </div>
