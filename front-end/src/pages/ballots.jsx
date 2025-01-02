@@ -23,8 +23,9 @@ export default function Ballots() {
       setIsModalOpen(true);
     }
 
-    const handleSave = () => {
+    const handleSave = (form) => {
       //save ballot.
+      return form
     }
 
     return (
