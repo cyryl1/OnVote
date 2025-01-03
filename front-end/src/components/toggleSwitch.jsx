@@ -1,6 +1,13 @@
 // import React from 'react'
 
 export default function ToggleSwitch({ enabled, onChange }) {
+    // const handleChange = () => {
+    //     if (enabled) {
+    //         onChange(false);
+    //     } else {
+    //         onChange(true);
+    //     }
+    // }
   return (
     <div className="flex items-center gap-3">
         <button

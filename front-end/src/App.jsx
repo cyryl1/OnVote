@@ -9,6 +9,7 @@ import Overview from './pages/overview.jsx';
 import Settings from './pages/settings';
 import Ballots from './pages/ballots.jsx';
 import Voters from './pages/voters';
+import Ballot from './pages/ballot.jsx';
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/ballots" element={<Ballots />} />
         <Route path="/voters" element={<Voters />} />
+        <Route path="/ballot/" element={<Ballot />} />
       </Routes>
     </BrowserRouter>
   )

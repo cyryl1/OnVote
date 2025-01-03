@@ -14,9 +14,9 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const [formData, setFormData] = useState({
-        title: '',
+        ballotTitle: 'Ballot Title',
         description: '',
-        randomEnabled: randomEnabled,
+        random: '',
     })
 
     const handleChange = (e) => {
@@ -25,16 +25,35 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
     }
 
 
-    const handleSave = (e) => {
+    const handleBallotSave = (e) => {
         e.preventDefault();
-        // handleSave
-        if (!formData.title) {
-            setError({title: 'Title is required'})
-            return;
+        // // handleBallotSave
+        const newErrors = validate(formData);
+        setError(newErrors);
+        
+        if (Object.keys(newErrors).length === 0) {
+            if (randomEnabled) {
+                formData.random = 'on';
+            } else {
+                formData.random = 'off';
+            }
+            onSave(formData);
+            onRequestClose();
+            console.log(formData);
         }
-        // Save
-        onSave(formData);
+        // // Save
+        
     }
+
+    const validate = (form) => {
+        const errors = {}
+        if (!form.ballotTitle) {
+            errors.ballotTitle = 'Title is required';
+        }
+
+        return errors;
+    }
+
 
     const handleDeleteModal = (e) => {
         e.preventDefault();
@@ -47,6 +66,11 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
     const handleBallotDelete = () => {
         // Handle delete
     }
+
+    // const handleRandom = (state) => {
+    //     setRandomEnabled(state);
+    //     console.log(randomEnabled);
+    // }
 
     if (!isOpen) return null;
   return (
@@ -69,15 +93,15 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
                             <p>Voters can select only one option</p>
                         </div>
                         <div className="form-group mt-[1rem] flex flex-col gap-1">
-                            {error.title && (
-                                <p>{error.title}</p>
+                            {error.ballotTitle && (
+                                <p className="text-red-600">{error.ballotTitle}</p>
                             )}
                             <label htmlFor="ballotTitle" className="text-[1rem] font-bold">Title</label>
-                            <input type="text" onChange={handleChange} name="ballotTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm"  defaultValue={'Ballot Title'}/>
+                            <input type="text" onChange={handleChange} value={formData.ballotTitle} name="ballotTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" />
                         </div>
                         <div className="form-group flex flex-col gap-1 mt-[1rem]">
                             <label htmlFor="description" className="text-[1rem] font-bold">Description</label>
-                            <textarea name="description" onChange={handleChange} className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" rows={10} id=""></textarea>
+                            <textarea name="description" value={formData.description} onChange={handleChange} className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" rows={10} id=""></textarea>
                         </div>
 
                         <div className="form-group border border-[#ced4da] mt-[2rem] px-[1rem] py-[1rem]">
@@ -87,13 +111,13 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
                                 <div></div>
                                 <ToggleSwitch 
                                     enabled={randomEnabled}
-                                    onChange={() => setRandomEnabled(!randomEnabled)}
+                                    onChange={() => {setRandomEnabled(!randomEnabled); console.log(randomEnabled)}}
                                 />
                             </div>
                         </div>
 
                         <div className="form-group mt-[2rem] flex justify-between">
-                            <button type="submit" onClick={handleSave} className="bg-[#2ecd10] text-white px-[1rem] py-[.5rem] rounded">Save</button>
+                            <button type="submit" onClick={handleBallotSave} className="bg-[#2ecd10] text-white px-[1rem] py-[.5rem] rounded">Save</button>
                             <button type="submit" onClick={handleDeleteModal} className="bg-[#ff0000] text-white flex items-center gap-2 py-[.5rem] px-[1rem] rounded">
                                 <RiDeleteBinFill />
                                 Delete
