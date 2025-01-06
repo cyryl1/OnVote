@@ -21,9 +21,9 @@ export default function Login() {
         setFormData({...formData, [name]: value});
     };
 
-    const handleLogin = async (form)=> {
+    const handleLogin = async (form) => {
         try {
-            const formEncoded = URLSearchParams(form);
+            const formEncoded = new URLSearchParams();
             for (const key in form) {
                 formEncoded.append(key, form[key]);
             }

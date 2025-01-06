@@ -35,9 +35,8 @@ def register():
 
 @bp.post("/login")
 def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    email = request.form.get("email")
+    password = request.form.get("password")
 
     admin = Admin.query.filter_by(email=email).first()
     if not admin:
