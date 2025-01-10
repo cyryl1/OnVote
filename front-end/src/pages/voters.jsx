@@ -14,6 +14,13 @@ export default function Settings() {
     const { electionDetails } = useContext(TokenContext);
     const [openVoterModal, setOpenVoterModal] = useState(false);
     const [addVoters, setAddVoters] = useState(false);
+
+    const [formData, setFormData] = useState({
+        voter_name: '',
+        voter_id: '',
+        voter_key: '',
+        voter_email: '',
+    });
     
 
     const handleButtonChange = () => {
@@ -27,6 +34,12 @@ export default function Settings() {
 
     const handleVoterSave = (form) => {
         if (form) {
+            setFormData({
+                voter_name: form.voter_name,
+                voter_id: form.voter_id,
+                voter_key: form.voter_key,
+                voter_email: form.voter_email,
+            })
             console.log(form);
             setAddVoters(true);
         }
@@ -74,7 +87,9 @@ export default function Settings() {
                             </>
                         )}
                         {addVoters && (
-                            <Voter />
+                            <Voter
+                                form={formData}
+                             />
                         )}
                         
                     </div>

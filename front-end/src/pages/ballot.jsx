@@ -7,7 +7,7 @@ import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { GrClear } from "react-icons/gr";
 import { RiDeleteBin6Line } from "react-icons/ri";
-// import { IoCheckmarkCircleSharp } from "react-icons/io5";
+import { IoCheckmarkCircleSharp } from "react-icons/io5";
 
 export default function Ballot() {
     // const { electionDetails } = useContext(TokenContext);
@@ -15,12 +15,13 @@ export default function Ballot() {
     const [isOpen, setIsOpen] = useState(false);
     const [ballotDropdown, setBallotDropdown] = useState(false);
     const [questionDropdown, setQuestionDropdown] = useState(false);
-    // const [options, setOptions] = useState({});
+    const [options, setOptions] = useState(false);
     // const [counter, setCounter] = useState(0);
     
 
     const handleSave = (form) => {
         console.log(form);
+        setOptions(true);
         // setCounter(counter + 1);
         // if (form) {
         //     setOptions({counter: {
@@ -89,21 +90,22 @@ export default function Ballot() {
                             <div className="mt-[1rem] rounded px-[1rem] py-[.5rem] bg-[#fff] border border-[#dee2e6] -mb-px w-fit border-b-[#fff]">Options</div>
                         </div>
                         <div className="w-[90%] m-auto  py-[1rem]">
-                            {/* {!options && ( */}
-                            <div className=" bg-[#ecf9ff] text-[#076796] rounded px-[1.25rem] py-[.75rem] text-[1.1rem] border border-[#c1eafe]">
-                                Click the &quot;Add Options&quot; button below to add an options to this ballot
-                            </div>
-                            {/* )} */}
+                            {!options && (
+                                <div className=" bg-[#ecf9ff] text-[#076796] rounded px-[1.25rem] py-[.75rem] text-[1.1rem] border border-[#c1eafe]">
+                                    Click the &quot;Add Options&quot; button below to add an options to this ballot
+                                </div>
+                            )}
 
-                            {/* {options && (
-                                <div className="option">
-                                    <div>
+                            {options && (
+                                <div className="option flex items-center justify-between bg-[#f3f6f8] px-[1rem] py-[.5rem] rounded">
+                                    <div className="flex items-center gap-2">
                                         <IoCheckmarkCircleSharp />
                                         {'Options'}
                                     </div>
+                                    <button></button>
                                     <FaEllipsisH />
                                 </div>
-                            )} */}
+                            )}
                             
                         
                             <button onClick={handleAddOption} className="mt-[1rem] w-fit text-white font-semibold flex items-center gap-1 border-[#2ecd10] bg-[#2ecd10] px-[.5rem] py-[0.3rem] rounded">

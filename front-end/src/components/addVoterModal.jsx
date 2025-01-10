@@ -78,7 +78,7 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave }) {
             className='modal mt-[.5rem] mb-[1rem] overflow-y-auto scrollbar-hide no-scrollbar'
             overlayClassName={`overlay bg-[#000] fixed top-0 left-0 right-0 bottom-0 flex flex-col items-center ${isOpen ? 'backdrop-blur-sm opacity-[.95]' : ''}`}
         >
-            <div className="bg-[#fff] w-[90%] m-auto z-99">
+            <div className="bg-[#fff] w-[80%] m-auto z-99">
                 <div className="flex justify-between px-[2rem] py-[1rem] bg-[#0bacfa]">
                     <div className="text-[1.5rem] text-[#fff] font-semibold">Add Voter</div>
                     <div className="text-[1rem] text-[#fff] font-bold" onClick={onRequestClose}>X</div>
