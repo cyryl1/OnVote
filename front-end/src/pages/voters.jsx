@@ -8,7 +8,7 @@ import { IoMdAdd } from "react-icons/io";
 import AddVoterModal from "../components/addVoterModal";
 import Voter from "./voter";
 
-export default function Settings() {
+export default function Voters() {
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const { electionDetails } = useContext(TokenContext);
@@ -21,6 +21,8 @@ export default function Settings() {
         voter_key: '',
         voter_email: '',
     });
+
+    // const [voters, setVoters] = useState([]);
     
 
     const handleButtonChange = () => {
@@ -43,6 +45,10 @@ export default function Settings() {
             console.log(form);
             setAddVoters(true);
         }
+        // setVoters((prevvoters) => [...prevvoters, newVoter]);
+        // console.log(newVoter);
+        // setAddVoters(true);
+        // console.log(voters);
     }
 
     return (
@@ -89,6 +95,7 @@ export default function Settings() {
                         {addVoters && (
                             <Voter
                                 form={formData}
+                                onOpenModal={handleAddVoter}
                              />
                         )}
                         

@@ -34,6 +34,7 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave }) {
             onSave(formData);
             onRequestClose();
             console.log(formData);
+            // setFormData({name: "", voter_id: "", email: ""});
         }
         // // Save
         
