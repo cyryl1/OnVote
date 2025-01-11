@@ -10,6 +10,7 @@ import Settings from './pages/settings';
 import Ballots from './pages/ballots.jsx';
 import Voters from './pages/voters';
 import Ballot from './pages/ballot.jsx';
+import ProfileSettings from './pages/profileSettings.jsx';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/ballots" element={<Ballots />} />
         <Route path="/voters" element={<Voters />} />
         <Route path="/ballot/" element={<Ballot />} />
+        <Route path="/profile_settings" element={<ProfileSettings />} />
       </Routes>
     </BrowserRouter>
   )

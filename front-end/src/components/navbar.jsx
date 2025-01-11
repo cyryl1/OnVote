@@ -5,14 +5,13 @@ import { IoMdMail } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import { TokenContext } from '../context/AuthContext';
 
-
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(false);
   const { name } = useContext(TokenContext);
 
   return (
     <nav className='flex items-center justify-between flex-row-reverse flex-wrap px-[2rem] lg:flex-row lg:px-[8.5rem] lg:py-[1rem] bg-[#0bacfa]'>
-        <div className='flex items-center flex-shrink-0 text-white mr-6 lg:mr-22 lg:h-[3rem]'>
+        <div className='flex items-center flex-shrink-0 text-white mr-auto lg:mr-22 lg:h-[3rem]'>
             <img src={Logo} alt="OnVote" className="w-[10rem] " />
         </div>
         <div className='block lg:hidden'>
@@ -39,7 +38,7 @@ export default function Dashboard() {
         <div className={`w-full block lg:flex flex-grow lg:flex-row lg:items-center lg:mb-3 lg:w-auto ${isOpen ? "block" : "hidden"} text-[#fffc]`}>
             <div className='flex flex-col lg:flex-row gap-3 text-sm mt-4 lg:flex-grow '>
                 <Link to='/dashboard' className='text-[1rem] font-semibold'>Dashboard</Link>
-                <Link to='/dashboard' className='font-semibold text-[1rem]'>Settings</Link>
+                <Link to='/profile_settings' className='font-semibold text-[1rem]'>Settings</Link>
             </div>
             <div className='flex flex-col gap-6 lg:flex-row font-semibold mt-[1rem]'>
                 <div>
