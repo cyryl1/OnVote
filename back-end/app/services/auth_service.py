@@ -1,4 +1,4 @@
-from app.models.admin_model import Admin
+from app.models.auth_model import Auth
 import bcrypt
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
@@ -8,10 +8,10 @@ class AuthService:
         pass
 
     def register_user(self, name, email, password):
-        admin = Admin.query.filter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if admin:
             return {"status": "error", "message": "User already exists"}
-        new_admin = Admin(name=name, email=email)
+        new_admin = Auth(name=name, email=email)
         new_admin.set_password(password)
 
         try:
@@ -23,7 +23,7 @@ class AuthService:
 
 
     def validate_user(self, email, password):
-        admin = Admin.query.filter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if not admin:
             return {"status": "error", "message": "User not found"}
         check_password = admin.check_password(password)
@@ -40,7 +40,7 @@ class AuthService:
             return {"status": "error", "message": "Invalid email or password"}
 
     def delete_user(self, email):
-        admin = Admin.query.filter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if not admin:
             return {"status": "error", "message": "User doesn't exist"}
 
@@ -51,7 +51,7 @@ class AuthService:
             return {"status": "error", "message": str(e)}
         
     def check_profile(self, email):
-        admin = Admin.query.filter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if not admin:
             return {"status": "error", "message": "User does not exist"}
         return {
@@ -64,7 +64,7 @@ class AuthService:
         }
     
     def update_general_profile(self, email, new_email, new_name):
-        admin = Admin.query.fiter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if admin:
             admin.email = new_email
             admin.name = new_name
@@ -88,7 +88,7 @@ class AuthService:
         }
     
     def update_password(self, email, current_password, new_password):
-        admin = Admin.query.filter_by(email=email).first()
+        admin = Auth.query.filter_by(email=email).first()
         if admin:
             check_password = admin.check_password(current_password)
             if check_password:

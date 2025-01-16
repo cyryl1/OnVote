@@ -6,5 +6,23 @@ class Election(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
-    start_time = db.Column(db.Date, nullable=False, default=datetime.now)
-    end_time = db.Column(db.Date, nullable=False, default=datetime.now)
+    description = db.Column(db.Text, nullable=True)
+    start_date = db.Column(db.Date, nullable=False, default=datetime.now)
+    end_date = db.Column(db.Date, nullable=False, default=datetime.now)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'start_date': self.start_date,
+            'end_date': self.end_date
+        }
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

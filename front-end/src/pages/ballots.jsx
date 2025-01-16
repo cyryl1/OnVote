@@ -60,7 +60,7 @@ export default function Ballots() {
                   <MdBallot />
                   Build Your Ballot
                 </div>
-                <p className="text-[1.5rem]">Get started by adding your first ballot</p>
+                <p className="text-[1.2rem]">Get started by adding your first ballot</p>
                 <div  className="flex items-center gap-1 text-[1.3rem] mt-[1rem]">
                   <button className="flex items-center gap-1 border border-[#0bacfa] text-[#0bacfa] px-[1rem] py-[0.5rem] rounded-sm">
                     <FaCloudArrowUp />

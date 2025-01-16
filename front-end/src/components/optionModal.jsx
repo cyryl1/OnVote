@@ -81,29 +81,29 @@ export default function OptionModal({ isOpen, onRequestClose, onSave }) {
                 isOpen={isOpen}
                 onRequestClose={onRequestClose}
                 contentLabel="Edit Ballot Question"
-                className='modal mt-[.5rem] mb-[.5rem] overflow-y-auto scrollbar-hide no-scrollbar'
+                className='modal mt-[.5rem] w-[95%] mb-[.5rem] overflow-y-auto scrollbar-hide no-scrollbar'
                 overlayClassName={`overlay bg-[#000] fixed top-0 left-0 right-0 bottom-0 flex flex-col items-center ${isOpen ? 'backdrop-blur-sm opacity-[.95]' : ''}`}
             >
-                <div className="bg-[#fff] w-[96%] m-auto z-99">
+                <div className="bg-[#fff]  m-auto z-99">
                     <div className="flex justify-between px-[2rem] py-[1rem] bg-[#0bacfa]">
                         <div className="text-[1.5rem] text-[#fff] font-semibold">Edit Option</div>
                         <div className="text-[1rem] text-[#fff] font-bold" onClick={onRequestClose}>X</div>
                     </div>
                     <div className="py-[1.5rem]">
                         <form action="">
-                            <div className="form-group text-[1.2rem] px-[2rem]">
+                            <div className="form-group text-[1.2rem] px-[1rem]">
                                 <label htmlFor="">Question</label>
                                 <p>Ballot title</p>
                             </div>
                             <div className='flex whitespace-normal'>
-                                <div className="form-group w-[60%] px-[2rem] mt-[1rem] flex flex-col gap-1">
+                                <div className="form-group px-[1rem] mt-[1rem] flex flex-col gap-1">
                                     {error.optionTitle && (
                                         <p className="text-red-600">{error.optionTitle}</p>
                                     )}
                                     <label htmlFor="optionTitle" className="text-[1rem] font-bold">Title</label>
-                                    <input type="text" value={formData.optionTitle} onChange={handleChange} name="optionTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" />
+                                    <input type="text" value={formData.optionTitle} onChange={handleChange} name="optionTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] w-[8rem] border-[#ced4da] rounded-sm" />
                                 </div>
-                                <div className="form-group w-[40%] flex flex-col gap-1 px-[1.5rem]">
+                                <div className="form-group  flex flex-col gap-1 px-[1.5rem]">
                                     {error.image && (
                                         <p>{error.image}</p>
                                     )}

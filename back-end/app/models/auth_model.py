@@ -1,7 +1,7 @@
 from app.models import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class Admin(db.Model):
+class Auth(db.Model):
     __tablename__ = "admin"
 
     id = db.Column(db.Integer, primary_key=True)
