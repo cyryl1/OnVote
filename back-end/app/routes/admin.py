@@ -12,6 +12,7 @@ def create_election():
     title = request.form.get('title')
     start_date = request.form.get('start_date')
     end_date = request.form.get('end_date')
+    
 
     election = admin.create_election(title, start_date, end_date)
     if election['status'] == 'error':
@@ -21,13 +22,24 @@ def create_election():
     else:
         return jsonify(election), 201
 
-@bp.get('/get_election')
+@bp.get('/get_all_elections')
 # @jwt_required()
-def get_election():
-    elections = admin.get_all_election()
+def get_all_elections():
+    elections = admin.get_all_elections()
     if elections['status'] == 'error':
         return jsonify(elections), 400
     return jsonify(elections), 200
+
+@bp.get('/get_election/<id>')
+def get_election(id):
+    election = admin.get_election(id)
+    if election['status'] == 'error':
+        return jsonify(election), 404
+    elif election['status'] == 'exception':
+        return jsonify(election), 500
+    else:
+        return jsonify(election), 200
+
 
 @bp.put('/election/general_settings/<id>')
 @jwt_required()

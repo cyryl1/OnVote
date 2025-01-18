@@ -15,8 +15,16 @@ class Admin_service:
                 "message": "Election already exists"
             }
         date_format = "%Y/%m/%d %H:%M:%S"
-        start = datetime.strptime(start_date, date_format)
-        end = datetime.strptime(end_date, date_format)
+        try:
+            start = datetime.strptime(start_date, date_format)
+            end = datetime.strptime(end_date, date_format)
+        except ValueError:
+            return {
+                "status": "error",
+                "message": f"Invalid date format. Expected format: {date_format}"
+            }
+        print(start)
+        print(end)
         time_diff = abs(end - start)
 
         if end <= start:
@@ -35,7 +43,13 @@ class Admin_service:
             new_election.save()
             return {
                 "status": "created",
-                "message": "Election created successfully",
+                "message": {
+                    "title": new_election.title,
+                    "start_date": datetime.strftime(new_election.start_date, date_format),
+                    "end_date": datetime.strftime(new_election.end_date, date_format),
+                    "description": new_election.description,
+                    "options": []  # Return empty list instead of error when no options exist
+                },
                 "id": new_election.id
             }
         except Exception as e:
@@ -44,17 +58,64 @@ class Admin_service:
                 "message": str(e)
             }
         
-    def get_all_election(self):
-        elections = Election.query.all()
-        if elections:
+    def get_all_elections(self):
+        try:
+            elections = Election.query.all()
+            if not elections:
+                return {
+                    "status": "success",
+                    "message": []  # Return empty list instead of error when no elections exist
+                }
+
+            result = []
+            for election in elections:
+                election_dict = election.to_dict()
+                # Format dates if they exist
+                for date_field in ['start_date', 'end_date']:
+                    if election_dict.get(date_field):
+                        election_dict[date_field] = datetime.strftime(
+                            election_dict[date_field],
+                            '%Y/%m/%d %H:%M:%S'
+                        )
+                result.append(election_dict)
+
             return {
                 "status": "success",
-                "message": [election.to_dict() for election in elections]
+                # "message": [election.to_dict() for election in elections]
+                "message": result
             }
-        return {
-            "status": "error",
-            "message": "error retrieving elections"
-        }
+
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error retrieving elections: {str(e)}"
+            }
+    
+    def get_election(self, id):
+        try:
+            election = Election.query.filter_by(id=id).first()
+            election = election.to_dict()
+            if election:
+                return {
+                    "status": "success",
+                    "message": {
+                        "id": election.get('id'),
+                        "title": election.get('title'),
+                        "description": election.get('description'),
+                        "start_date": datetime.strftime(election['start_date'], '%Y/%m/%d %H:%M:%S'),
+                        "end_date": datetime.strftime(election['end_date'], '%Y/%m/%d %H:%M:%S'),
+                    }
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": "Election not found"
+                }
+        except Exception as e:
+            return {
+                "status": "exception",
+                "message": f"Error retrieving election: {str(e)}"
+            }
     
     def election_general_settings(self, id, new_title, description):
         election = Election.query.filter_by(id=id).first()

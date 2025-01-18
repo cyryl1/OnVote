@@ -9,6 +9,13 @@ export const TokenProvider = ({ children }) => {
         resetToken: null,
     });
 
+    const saveTokens = (newTokens) => {
+        localStorage.setItem("accessToken", newTokens.accessToken);
+        localStorage.setItem("resetToken", newTokens.resetToken);
+
+        setTokens(newTokens);
+    }
+
     const [name, setName] = useState(null);
 
     const [electionDetails, setElectionDetails] = useState({
@@ -16,6 +23,14 @@ export const TokenProvider = ({ children }) => {
         start_date: '',
         end_date: '',
     });
+
+    const saveElectionDetails = (newDetails) => {
+        localStorage.setItem("election_title", newDetails.title);
+        localStorage.setItem("election_start_date", newDetails.start_date);
+        localStorage.setItem("election_end_date", newDetails.end_date);
+
+        setElectionDetails(newDetails);
+    }
     
 
 
@@ -23,10 +38,12 @@ export const TokenProvider = ({ children }) => {
         <TokenContext.Provider 
             value={{ 
                 tokens, 
+                saveTokens,
                 setTokens, 
                 name, 
                 setName, 
-                electionDetails, 
+                electionDetails,
+                saveElectionDetails,
                 setElectionDetails,
             }}
         >

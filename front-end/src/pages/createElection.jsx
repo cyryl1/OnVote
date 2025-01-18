@@ -3,6 +3,7 @@ import Logo from '../assets/onvote-high-resolution-logo.svg';
 import { FaChevronCircleRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { TokenContext } from '../context/AuthContext';
+import axios from 'axios';
 
 export default function CreateElection() {
   const navigate = useNavigate();
@@ -13,23 +14,31 @@ export default function CreateElection() {
   })
 
   const [errors, setErrors] = useState({});
-  const { setElectionDetails} = useContext(TokenContext);
+  const { saveElectionDetails} = useContext(TokenContext);
+  const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({...formData, [name]: value})
   }
 
-  const handleCreateElection = (form) => {
-    if (form) {
-      setElectionDetails({
-        title: form.title,
-        start_date: form.start_date,
-        end_date: form.end_date
-      })
-      setTimeout(() => {
-        navigate('/overview');
-      }, 1000)
+  const handleCreateElection = async (form) => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const response = await axios.get('http://127.0.0.1:5000/onvote/election/create', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (response.status === 200 && response.data.message) {
+        saveElectionDetails({
+          title: response.data.message.title,
+          start_date: response.data.message.start_date,
+          end_date: response.data.message.end_date,
+        });
+        setPageState(true);
+      }
+    } catch (err) {
+      setError(`Failed to load data: ${err.message || err}`);
     }
   }
 
@@ -65,6 +74,8 @@ export default function CreateElection() {
 
     return errors;
   }
+
+  if (error) return <p>{error}</p>
   return (
     <div className='flex flex-col items-center justify-center'>
       <div>

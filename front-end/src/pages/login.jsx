@@ -3,11 +3,14 @@ import Logo from '../assets/onvote-high-resolution-logo.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useContext } from 'react';
 import { TokenContext } from '../context/AuthContext';
+import LoadingModal from '../components/loadingModal';
 
 export default function Login() {
     // const [accessToken, setAccessToken] = useState('');
     // const [resetToken, setResetToken] = useState('');
-    const { setTokens } = useContext(TokenContext);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const { saveTokens } = useContext(TokenContext);
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         email: '',
@@ -15,6 +18,7 @@ export default function Login() {
     });
 
     const [errors, setErrors] = useState({});
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -35,8 +39,9 @@ export default function Login() {
 
             const result = await response.json();
             if (response.status === 200) {
-                alert(result.message);
-                setTokens({
+                setMessage(result.message)
+                // alert(result.message);
+                saveTokens({
                     accessToken: result.tokens.access,
                     resetToken: result.tokens.reset
                 });
@@ -50,6 +55,8 @@ export default function Login() {
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            setIsLoading(false);
         }
     }
     
@@ -61,6 +68,7 @@ export default function Login() {
 
         if (Object.keys(newErrors).length === 0) {
             console.log("Form submitted successfully");
+            setIsLoading(true);
             handleLogin(formData);
             console.log(formData);
         } else {
@@ -112,6 +120,12 @@ export default function Login() {
             <div className="m-auto text-center">
                 <Link to='/register' className="text-[1.4rem] text-[#2b8357] cursor-pointer">No account? Create one for free!</Link>
             </div>
+
+            <LoadingModal 
+                isOpen={isLoading}
+                onRequestClose={() => setIsLoading(!isLoading)}
+                onMessage={message}
+            />
         </>
     )
 }
