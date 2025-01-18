@@ -25,8 +25,8 @@ export default function CreateElection() {
   const handleCreateElection = async (form) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.get('http://127.0.0.1:5000/onvote/election/create', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+      const response = await axios.post('http://127.0.0.1:5000/onvote/election/create', form, {
+        headers: { Authorization: `Bearer ${accessToken}` }
       });
 
       if (response.status === 200 && response.data.message) {
@@ -35,7 +35,8 @@ export default function CreateElection() {
           start_date: response.data.message.start_date,
           end_date: response.data.message.end_date,
         });
-        setPageState(true);
+        navigate('/overview');
+        // setPageState(true);
       }
     } catch (err) {
       setError(`Failed to load data: ${err.message || err}`);
