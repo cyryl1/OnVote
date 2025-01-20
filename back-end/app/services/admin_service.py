@@ -3,6 +3,13 @@ from app.models.ballot_model import Ballot
 from app.models.option_model import Option
 from datetime import datetime, timedelta
 
+def is_active(start_time, end_time):
+    format = "%Y-%m-%dT%H:%M:%S"
+    start_date = datetime.strptime(start_time, format)
+    end_date = datetime.strptime(end_time, format)
+    current_time = datetime.now()
+    return start_time <= current_time <= end_date
+
 class Admin_service:
     def __init__(self):
         pass
@@ -14,7 +21,7 @@ class Admin_service:
                 "status": "error",
                 "message": "Election already exists"
             }
-        date_format = "%Y/%m/%d %H:%M:%S"
+        date_format = "%Y-%m-%dT%H:%M"
         try:
             start = datetime.strptime(start_date, date_format)
             end = datetime.strptime(end_date, date_format)

@@ -25,11 +25,16 @@ export default function CreateElection() {
   const handleCreateElection = async (form) => {
     try {
       const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.post('http://127.0.0.1:5000/onvote/election/create', form, {
-        headers: { Authorization: `Bearer ${accessToken}` }
+      console.log(accessToken);
+      const response = await axios.post('http://127.0.0.1:5000/onvote/election/create', JSON.stringify(form), {
+        headers: { 
+          'Authorization': `Bearer ${accessToken}`, 
+          'Content-Type': 'application/json',
+        },
+        // body: JSON.stringify(form)
       });
 
-      if (response.status === 200 && response.data.message) {
+      if (response.status === 201 && response.data.message) {
         saveElectionDetails({
           title: response.data.message.title,
           start_date: response.data.message.start_date,

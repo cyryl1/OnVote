@@ -9,11 +9,10 @@ admin = Admin_service()
 @bp.post('/election/create')
 @jwt_required()
 def create_election():
-    title = request.form.get('title')
-    start_date = request.form.get('start_date')
-    end_date = request.form.get('end_date')
-    
-
+    data = request.get_json()
+    title = data.get('title')
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
     election = admin.create_election(title, start_date, end_date)
     if election['status'] == 'error':
         return jsonify(election), 400
