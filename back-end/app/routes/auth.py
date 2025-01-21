@@ -36,6 +36,15 @@ def login():
         return jsonify(result), 400
     else:
         return jsonify(result), 200
+    
+@bp.post('/refresh')
+@jwt_required(refresh=True)
+def refresh_user():
+    current_user = get_jwt_identity()
+    refresh = auth.refresh(current_user)
+    if refresh['status'] == 'success':
+        return jsonify(refresh), 201
+    return jsonify(refresh), 400
 
 @bp.delete('/auth/delete')
 @jwt_required()

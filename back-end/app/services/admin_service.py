@@ -266,24 +266,31 @@ class Admin_service:
                 "message": str(e)
             }
 
-    def get_vote_url(self, start_date, end_date):
-        try:
-            if is_active(start_date, end_date):
+    def get_vote_url(self, id, start_date, end_date):
+        election = Election.query.filter_by(id=id).first()
+        if election:
+            try:
+                if is_active(start_date, end_date):
+                    return {
+                        "status": "success",
+                        "message": f"http://localhost:5000/vote/{start_date}/{end_date}",
+                        "is_active": True
+                    }
                 return {
-                    "status": "success",
-                    "message": f"http://localhost:5000/vote/{start_date}/{end_date}",
-                    "is_active": True
+                    "status": "error",
+                    "message": "Election not active",
+                    "is_active": False
                 }
+            except Exception as e:
+                return {
+                    'status': 'exception',
+                    'message': str(e),
+                    "is_active": False
+                }
+        else:
             return {
                 "status": "error",
-                "message": "Election not active",
-                "is_active": False
-            }
-        except Exception as e:
-            return {
-                'status': 'exception',
-                'message': str(e),
-                "is_active": False
+                "message": "election not found"
             }
 
         

@@ -3,17 +3,22 @@ import Navbar from '../components/navbar.jsx';
 import { useState, useEffect } from 'react';
 import { IoIosAddCircle } from "react-icons/io";
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LoadingModal from '../components/loadingModal';
 import axios from 'axios';
 import { MdDateRange } from "react-icons/md";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   // const [elec, setElec] = useState(false);
   const [data, setData] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pageState, setPageState] = useState(false);
+
+  const handleElectionClick = (electionId) => {
+    navigate(`/election/${electionId}/overview`);
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -79,8 +84,12 @@ export default function Dashboard() {
           <div>
             {data && data.map((item, index) => (
               // <p key={index}>{item.title}</p>
-              <div key={index} className='flex flex-col lg:flex-row bg-white border p-[1rem] w-[90%] m-auto mt-[1rem]'>
-                <Link to={`overview/${item.id}`}>
+              <div 
+                key={index} 
+                className='flex flex-col lg:flex-row bg-white border p-[1rem] w-[90%] m-auto mt-[1rem]'
+                onClick={() => handleElectionClick(item.id)}
+              >
+                <Link to={`election/${item.id}/overview`}>
                   <p className='font-bold'>{item.title}</p>
                   <div className='flex justify-between mt-[.6rem] text-[.8rem]'>
                     <div className='text-[#868e96]'>

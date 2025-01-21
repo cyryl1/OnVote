@@ -7,6 +7,7 @@ class AuthService:
     def __init__(self):
         pass
 
+
     def register_user(self, name, email, password):
         admin = Auth.query.filter_by(email=email).first()
         if admin:
@@ -38,6 +39,22 @@ class AuthService:
             }
         else:
             return {"status": "error", "message": "Invalid email or password"}
+        
+    def refresh(current_user):
+        try:
+            new_access_token = create_access_token(identity=current_user)
+            return{
+                "status": "success",
+                "message": "token refreshed",
+                "token": {
+                    'access': new_access_token
+                }
+            }
+        except Exception as e:
+            return {
+                "status": "exception",
+                "message": str(e)
+            }
 
     def delete_user(self, email):
         admin = Auth.query.filter_by(email=email).first()

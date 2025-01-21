@@ -21,7 +21,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<Register />} />
         <Route path="/election/create" element={<CreateElection />} />
-        <Route path="/overview" element={<Overview />} />
+        <Route path="/election/:id/overview" element={<Overview />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/ballots" element={<Ballots />} />
         <Route path="/voters" element={<Voters />} />

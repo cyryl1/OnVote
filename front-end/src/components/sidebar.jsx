@@ -11,8 +11,8 @@ import { HiRocketLaunch } from "react-icons/hi2";
 import { Link } from 'react-router-dom';
 
 
-export default function Sidebar() {
-    const { electionDetails} = useContext(TokenContext);
+export default function Sidebar({ start_date, end_date }) {
+    // const { electionDetails} = useContext(TokenContext);
     return (
         <div  className='bg-[#1c2a39] h-full'>
             <div className='bg-[#0bacfa] w-full px-[1rem] h-[3.6rem]'>
@@ -61,11 +61,11 @@ export default function Sidebar() {
                 <div className='mt-[2rem] px-4 '>
                     <div className=''>
                         <p className='text-[0.7rem] font-bold text-[#868e96]'>START DATE</p>
-                        <p className='text-[#fff] decoration-dashed'>{electionDetails.start_date || "election start_date"}</p>
+                        <p className='text-[#fff] decoration-dashed'>{start_date || "election start_date"}</p>
                     </div>
                     <div className='mt-[1rem]'>
                         <p className='text-[0.7rem] font-bold text-[#868e96]'>END DATE</p>
-                        <p  className='text-[#fff] decoration-dashed'>{electionDetails.end_date || "election end_date"}</p>
+                        <p  className='text-[#fff] decoration-dashed'>{end_date || "election end_date"}</p>
                     </div>
                 </div>
             </div>

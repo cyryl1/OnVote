@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 import Sidebar from "../components/sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
 // import { TokenContext } from "../context/AuthContext";
@@ -15,6 +16,7 @@ import axios from 'axios';
 // import io from 'socket.io-client';
 
 export default function Overview() {
+    const { id } = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     // const { electionDetails } = useContext(TokenContext);
@@ -30,37 +32,53 @@ export default function Overview() {
     const [electionUrl, setElectionURL] = useState(null);
     const [isUrlActive, setIsUrlActive]= useState(false);
 
-    const fetchUrl = async (accessToken) => {
+    const fetchUrl = async (accessToken, id) => {
         try {
-            const response = await axios.get("http://127.0.0.1:5000/onvote/election_url", {
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/election_url/${id}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
             if (response.status === 200 && response.data.message) {
                 setElectionURL(response.data.message);
                 setIsUrlActive(response.data.is_active);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
         } catch (err) {
             setError(`Failed to load: ${err.message || err}`);
         }
     }
 
+    const fetchPageData = async (accessToken, id) => {
+        try {
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/get_election/${id}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            if (response.status === 200 && response.data.message) {
+                setElectionDetails({
+                    electionTitle: response.data.message.title,
+                    startDate: response.data.message.start_date,
+                    endDate: response.data.message.end_date
+                });
+            }
+        } catch (err) {
+            setError(`Failed to load: ${err.message || err}`);
+        }
+    }
     useEffect(() => {
-        const fetchData = () => {
+        const fetchData = async (id) => {
             try {
                 setIsLoading(true);
+                setError(null);
 
                 const accessToken = localStorage.getItem('accessToken');
                 if (!accessToken) {
                     throw new Error('Access token not found in localStorage');
                 }
 
-                fetchUrl(accessToken);
-
-                setElectionDetails({
-                    electionTitle: localStorage.getItem('election_title'),
-                    startDate: localStorage.getItem('election_start_date'),
-                    endDate: localStorage.getItem('election_end_date'),
-                })
+                await Promise.all([
+                    fetchPageData(accessToken, id),
+                    fetchUrl(accessToken, id)
+                ]);
 
                 const interval = setInterval(fetchUrl, 30000) //Polls every 30 seconds
 
@@ -72,8 +90,8 @@ export default function Overview() {
             setIsLoading(false);
             }
         };
-        fetchData();
-    }, [])
+        fetchData(id);
+    }, [id])
     
 
     const handleButtonChange = () => {
@@ -87,7 +105,12 @@ export default function Overview() {
     return (
         <>
             <div className="">
-                <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}><Sidebar /></div>
+                <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}>
+                    <Sidebar
+                        start_date={electionDetails.startDate}
+                        end_date={electionDetails.endDate}
+                    />
+                </div>
                 <div className={`whitespace-nowrap flex flex-col duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem]`}>
                     <div className={`flex-grow sticky top-0 bg-[#fff] flex whitespace-nowrap w-[100%] gap-[0.2rem] items-center border border-l-0 border-r-0 border-t-0`}>
                         <div className={`flex lg:hidden justify-center items-center w-[5%] px-[1.5rem] py-[1rem] border border-l-0 border-t-0 border-b-0 ${isActive ? 'bg-[#f2f2f2]' : 'bg-[#f6f8fa]'}`}>
