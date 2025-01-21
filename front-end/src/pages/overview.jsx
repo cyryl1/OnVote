@@ -11,24 +11,60 @@ import { FaUsers } from "react-icons/fa";
 import { HiMiniQuestionMarkCircle } from "react-icons/hi2";
 import { IoIosOptions } from "react-icons/io";
 import LoadingModal from '../components/loadingModal';
+import axios from 'axios';
+// import io from 'socket.io-client';
 
 export default function Overview() {
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     // const { electionDetails } = useContext(TokenContext);
     const [isLoading, setIsLoading] = useState(false);
-    const [electionDetails, setElectionDetails] = useState({})
+    const [electionDetails, setElectionDetails] = useState({
+        electionTitle: "",
+        startDate: "",
+        endDate: "",
+    })
     const [error, setError] = useState('');
+    // const socket = io("http://localhost:5000")
+
+    const [electionUrl, setElectionURL] = useState(null);
+    const [isUrlActive, setIsUrlActive]= useState(false);
+
+    const fetchUrl = async (accessToken) => {
+        try {
+            const response = await axios.get("http://127.0.0.1:5000/onvote/election_url", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            if (response.status === 200 && response.data.message) {
+                setElectionURL(response.data.message);
+                setIsUrlActive(response.data.is_active);
+            }
+        } catch (err) {
+            setError(`Failed to load: ${err.message || err}`);
+        }
+    }
 
     useEffect(() => {
         const fetchData = () => {
             try {
                 setIsLoading(true);
+
+                const accessToken = localStorage.getItem('accessToken');
+                if (!accessToken) {
+                    throw new Error('Access token not found in localStorage');
+                }
+
+                fetchUrl(accessToken);
+
                 setElectionDetails({
                     electionTitle: localStorage.getItem('election_title'),
                     startDate: localStorage.getItem('election_start_date'),
                     endDate: localStorage.getItem('election_end_date'),
                 })
+
+                const interval = setInterval(fetchUrl, 30000) //Polls every 30 seconds
+
+                return () => clearInterval(interval); // clears interval after ever poll
                 
             } catch (err) {
                 setError(`Failed to load data: ${err.message || err}`);
@@ -103,8 +139,21 @@ export default function Overview() {
                                             <div className="form-group">
                                                 <label htmlFor="" className="font-bold text-[0.9rem]">Election URL</label>
                                                 <div className="flex">
-                                                    <input type="text" className="text-[1rem] px-[0.4rem] py-[0.3rem] rounded-sm border border-[#ced4da] bg-[#f6f8fa] text-[#495057] lg:w-[90%]" />
-                                                    <button className="flex items-center gap-1 px-[0.4rem] shodow-md active:scale-95 active:shadow-inner transition bg-[#f0f0f0] border border-[#ced4da]">
+                                                    <input 
+                                                        type="text" 
+                                                        className="text-[1rem] px-[0.4rem] py-[0.3rem] rounded-sm border border-[#ced4da] bg-[#f6f8fa] text-[#495057] lg:w-[90%]" 
+                                                        value={
+                                                            isUrlActive && electionUrl
+                                                            ? electionUrl
+                                                            : "Election URL is not yet active."
+                                                        }
+                                                        readOnly
+                                                    />
+                                                    <button 
+                                                        className="flex items-center gap-1 px-[0.4rem] shodow-md active:scale-95 active:shadow-inner transition bg-[#f0f0f0] border border-[#ced4da]"
+                                                        onClick={() => navigator.clipboard.writeText(electionUrl)}
+                                                        disabled={!isUrlActive}
+                                                    >
                                                         <FaRegCopy />
                                                         Copy
                                                     </button>

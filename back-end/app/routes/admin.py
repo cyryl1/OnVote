@@ -78,3 +78,17 @@ def delete_election(id):
         return jsonify(response), 400
     else:
         return jsonify(response), 201
+    
+@bp.get('/election_url')
+@jwt_required()
+def get_vote_url():
+    data = request.get_json()
+    print(data)
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
+    active_url = admin.get_vote_url(start_date, end_date)
+    if active_url['status'] == 'error':
+        return jsonify(active_url), 404
+    elif active_url['status'] == 'exception':
+        return jsonify(active_url), 400
+    return jsonify(active_url), 200

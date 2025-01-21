@@ -8,7 +8,7 @@ def is_active(start_time, end_time):
     start_date = datetime.strptime(start_time, format)
     end_date = datetime.strptime(end_time, format)
     current_time = datetime.now()
-    return start_time <= current_time <= end_date
+    return start_date <= current_time <= end_date
 
 class Admin_service:
     def __init__(self):
@@ -18,7 +18,7 @@ class Admin_service:
         election = Election.query.filter_by(title=title).first()
         if election:
             return {
-                "status": "error",
+                "status": "ecrror",
                 "message": "Election already exists"
             }
         date_format = "%Y-%m-%dT%H:%M"
@@ -45,7 +45,10 @@ class Admin_service:
                 "status": "error",
                 "message": "The end date should be at least one hour from start date"
             }
-        new_election = Election(title=title, start_date=start, end_date=end, description=description)
+        if title is not None and start_date is not None and end_date is not None:
+            new_election = Election(title=title, start_date=start, end_date=end, description=description)
+        else:
+            raise ValueError('title, start_date, end_date is None')
         try:
             new_election.save()
             return {
@@ -261,6 +264,26 @@ class Admin_service:
             return {
                 "status": "exception",
                 "message": str(e)
+            }
+
+    def get_vote_url(self, start_date, end_date):
+        try:
+            if is_active(start_date, end_date):
+                return {
+                    "status": "success",
+                    "message": f"http://localhost:5000/vote/{start_date}/{end_date}",
+                    "is_active": True
+                }
+            return {
+                "status": "error",
+                "message": "Election not active",
+                "is_active": False
+            }
+        except Exception as e:
+            return {
+                'status': 'exception',
+                'message': str(e),
+                "is_active": False
             }
 
         

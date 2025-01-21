@@ -75,27 +75,30 @@ export default function Dashboard() {
             </Link>
             
           </div>
+          
           <div>
             {data && data.map((item, index) => (
               // <p key={index}>{item.title}</p>
               <div key={index} className='flex flex-col lg:flex-row bg-white border p-[1rem] w-[90%] m-auto mt-[1rem]'>
-                <p className='font-bold'>{item.title}</p>
-                <div className='flex justify-between mt-[.6rem] text-[.8rem]'>
-                  <div className='text-[#868e96]'>
-                    <p className='flex items-center gap-1'>
-                      <MdDateRange />
-                      START DATE
-                    </p>
-                    <p>{item.start_date}</p>
+                <Link to={`overview/${item.id}`}>
+                  <p className='font-bold'>{item.title}</p>
+                  <div className='flex justify-between mt-[.6rem] text-[.8rem]'>
+                    <div className='text-[#868e96]'>
+                      <p className='flex items-center gap-1'>
+                        <MdDateRange />
+                        START DATE
+                      </p>
+                      <p>{item.start_date}</p>
+                    </div>
+                    <div className='text-[#868e96]'>
+                      <p className='flex items-center gap-1'>
+                        <MdDateRange />
+                        END DATE
+                      </p>
+                      <p>{item.end_date}</p>
+                    </div>
                   </div>
-                  <div className='text-[#868e96]'>
-                    <p className='flex items-center gap-1'>
-                      <MdDateRange />
-                      END DATE
-                    </p>
-                    <p>{item.end_date}</p>
-                  </div>
-                </div>
+                </Link>
               </div> // Render fetched data
             ))}
           </div>
