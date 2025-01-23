@@ -26,17 +26,21 @@ export default function Overview() {
         startDate: "",
         endDate: "",
     })
+
     const [error, setError] = useState('');
     // const socket = io("http://localhost:5000")
 
     const [electionUrl, setElectionURL] = useState(null);
     const [isUrlActive, setIsUrlActive]= useState(false);
 
-    const fetchUrl = async (accessToken, id) => {
+    const fetchUrl = async () => {
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/onvote/election_url/${id}`, {
-                headers: { Authorization: `Bearer ${accessToken}` },
+            const response = await axios.post(`http://127.0.0.1:5000/onvote/election_url`, {
+                id: id,
+                start_date: electionDetails.startDate,
+                end_date: electionDetails.endDate
             });
+            
             if (response.status === 200 && response.data.message) {
                 setElectionURL(response.data.message);
                 setIsUrlActive(response.data.is_active);
@@ -59,13 +63,16 @@ export default function Overview() {
                     startDate: response.data.message.start_date,
                     endDate: response.data.message.end_date
                 });
+
+                localStorage.setItems(`election_${id}_startDate`, response.data.message.start_date);
+                localStorage.setItem(`election_${id}_endDate`, response.data.message.end_date);
             }
         } catch (err) {
             setError(`Failed to load: ${err.message || err}`);
         }
     }
     useEffect(() => {
-        const fetchData = async (id) => {
+        const fetchData = async (election_id) => {
             try {
                 setIsLoading(true);
                 setError(null);
@@ -75,10 +82,15 @@ export default function Overview() {
                     throw new Error('Access token not found in localStorage');
                 }
 
-                await Promise.all([
-                    fetchPageData(accessToken, id),
-                    fetchUrl(accessToken, id)
-                ]);
+                // await Promise.all([
+                //     fetchPageData(accessToken, election_id),
+                //     fetchUrl(accessToken, election_id)
+                // ]);
+
+                console.log(election_id);
+                fetchPageData(accessToken, election_id);
+                console.log(election_id);
+                fetchUrl(accessToken)
 
                 const interval = setInterval(fetchUrl, 30000) //Polls every 30 seconds
 
@@ -107,8 +119,7 @@ export default function Overview() {
             <div className="">
                 <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}>
                     <Sidebar
-                        start_date={electionDetails.startDate}
-                        end_date={electionDetails.endDate}
+                        id={id}
                     />
                 </div>
                 <div className={`whitespace-nowrap flex flex-col duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem]`}>

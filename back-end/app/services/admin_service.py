@@ -4,7 +4,7 @@ from app.models.option_model import Option
 from datetime import datetime, timedelta
 
 def is_active(start_time, end_time):
-    format = "%Y-%m-%dT%H:%M:%S"
+    format = "%Y/%m/%d %H:%M:%S"
     start_date = datetime.strptime(start_time, format)
     end_date = datetime.strptime(end_time, format)
     current_time = datetime.now()
@@ -129,6 +129,7 @@ class Admin_service:
     
     def election_general_settings(self, id, new_title, description):
         election = Election.query.filter_by(id=id).first()
+        print(description)
         if election:
             election.title = new_title
             election.description = description
@@ -152,7 +153,7 @@ class Admin_service:
         
     def election_dates(self, id, start_date, end_date):
         election = Election.query.filter_by(id=id).first()
-        date_format = "%Y/%m/%d %H:%M:%S"
+        date_format = "%Y-%m-%dT%H:%M"
         start = datetime.strptime(start_date, date_format)
         end = datetime.strptime(end_date, date_format)
         if election:
@@ -273,7 +274,7 @@ class Admin_service:
                 if is_active(start_date, end_date):
                     return {
                         "status": "success",
-                        "message": f"http://localhost:5000/vote/{start_date}/{end_date}",
+                        "message": f"http://localhost:5000/vote/{id}",
                         "is_active": True
                     }
                 return {

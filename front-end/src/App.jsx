@@ -22,10 +22,10 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/election/create" element={<CreateElection />} />
         <Route path="/election/:id/overview" element={<Overview />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/ballots" element={<Ballots />} />
-        <Route path="/voters" element={<Voters />} />
-        <Route path="/ballot/" element={<Ballot />} />
+        <Route path="/election/:id/settings" element={<Settings />} />
+        <Route path="/election/:id/ballots" element={<Ballots />} />
+        <Route path="/election/:id/voters" element={<Voters />} />
+        <Route path="/election/:id/ballot/" element={<Ballot />} />
         <Route path="/profile_settings" element={<ProfileSettings />} />
       </Routes>
     </BrowserRouter>

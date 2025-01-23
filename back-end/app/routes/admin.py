@@ -43,8 +43,9 @@ def get_election(id):
 @bp.put('/election/general_settings/<id>')
 @jwt_required()
 def election_general_settings(id):
-    new_title = request.form.get('title')
-    description = request.form.get('description')
+    data = request.get_json()
+    new_title = data.get('title')
+    description = data.get('description')
 
     response = admin.election_general_settings(id, new_title, description)
     if response['status'] == 'error':
@@ -57,8 +58,9 @@ def election_general_settings(id):
 @bp.put('/election/election_dates/<id>')
 @jwt_required()
 def election_dates(id):
-    start_date = request.form.get('start_date')
-    end_date = request.form.get('end_date')
+    data = request.get_json()
+    start_date = data.get('start_date')
+    end_date = data.get('end_date')
 
     response = admin.election_dates(id, start_date, end_date)
     if response['status'] == 'error':
@@ -69,6 +71,7 @@ def election_dates(id):
         return jsonify(response), 201
 
 @bp.delete('/election/delete/<id>')
+@jwt_required()
 def delete_election(id):
     response = admin.delete_election(id)
 
@@ -79,12 +82,16 @@ def delete_election(id):
     else:
         return jsonify(response), 201
     
-@bp.get('/election_url/<id>')
-@jwt_required()
-def get_vote_url(id):
+@bp.post('/election_url')
+# @jwt_required()
+def get_vote_url():
     data = request.get_json()
+    id = data.get('id')
     start_date = data.get('start_date')
     end_date = data.get('end_date')
+    # print(id)
+    # print(start_date)
+    # print(end_date)
     active_url = admin.get_vote_url(id, start_date, end_date)
     if active_url['status'] == 'error':
         return jsonify(active_url), 404
