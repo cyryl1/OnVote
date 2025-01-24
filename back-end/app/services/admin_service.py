@@ -220,28 +220,63 @@ class Admin_service:
                 "status": "error",
                 "message": "Election not found"
             }
+
+    def get_all_ballots(self, election_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            try:
+                ballots = Ballot.query.all()
+                if not ballots:
+                    return {
+                        "status": "success",
+                        "message": []  # Return empty list instead of error when no ballots exist
+                    }
+                
+                result = []
+                for ballot in ballots:
+                    ballot_dict = ballot.to_dict()
+                    result.append(ballot_dict)
+
+                return {
+                    "status": "success",
+                    # "message": [ballot.to_dict() for election in ballots]
+                    "message": result
+                }
+
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "message": f"Error retrieving ballots: {str(e)}"
+                }
         
-    def delete_ballot(self, ballot_id):
-        ballot = Ballot.query.filter_by(id=ballot_id).first()
-        if not ballot:
+    def delete_ballot(self, election_id, ballot_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            ballot = Ballot.query.filter_by(id=ballot_id).first()
+            if not ballot:
+                return {
+                    "status": "error",
+                    "message": "Ballot not found"
+                }
+            try:
+                ballot.delete()
+
+                return {
+                    "status": "success",
+                    "message": "Ballot deleted successfully"
+                }
+            except Exception as e:
+                return {
+                    "status": "exception",
+                    "message": str(e)
+                }
+        else:
             return {
                 "status": "error",
-                "message": "Ballot not found"
-            }
-        try:
-            ballot.delete()
-
-            return {
-                "status": "success",
-                "message": "Ballot deleted successfully"
-            }
-        except Exception as e:
-            return {
-                "status": "exception",
-                "message": str(e)
+                "message": "Election not found"
             }
         
-    def add_option(self, ballot_id, title, description=None, photo=None):
+    def add_option(self, ballot_id, title, description=None):
         ballot = Ballot.query.filter_by(id=ballot_id).first()
         if not ballot:
             return {

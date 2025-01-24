@@ -8,14 +8,22 @@ import { FaEdit } from "react-icons/fa";
 import { GrClear } from "react-icons/gr";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
+import PropTypes from 'prop-types';
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
+// import AddBallotModal from "../components/addBallotModal";
 
-export default function Ballot() {
+
+export default function Ballot({ pageData, addBallot }) {
     // const { electionDetails } = useContext(TokenContext);
 
     const [isOpen, setIsOpen] = useState(false);
     const [ballotDropdown, setBallotDropdown] = useState(false);
     const [questionDropdown, setQuestionDropdown] = useState(false);
     const [options, setOptions] = useState(false);
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+    // console.log(pageData);
     // const [counter, setCounter] = useState(0);
     
 
@@ -32,6 +40,10 @@ export default function Ballot() {
         // }
     }
 
+    const handleAdd = () => {
+        addBallot(true);
+    }
+
     const handleAddOption = () => {
         setIsOpen(true);
     }
@@ -44,6 +56,23 @@ export default function Ballot() {
         setQuestionDropdown(!questionDropdown);
     }
 
+    const handleDeleteBallot = async (election_id, id) => {
+        // e.preventDefault();
+        const accessToken = localStorage.getItem('accessToken');
+        try {
+            const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${election_id}/delete_ballot/${id}`, {
+                headers: { 'Authorization': `Bearer ${accessToken}` },
+            });
+            if (response.status === 200 && response.data.message) {
+                alert(response.data.message)
+                navigate(0);
+                // navigate('/dashboard');
+            }
+        } catch (err) {
+            setError(`Failed to load: ${err.message || err}`);
+        }
+    }
+    if (error) return <p>{error}</p>
     return (
         <>
             <div className="relative">
@@ -56,7 +85,10 @@ export default function Ballot() {
                         <div className="flex items-center justify-between lg:justify-normal lg:gap-2 mt-[.5rem]">
                             <div className="flex gap-1">
                                 <button className="border border-[#0bacfa] text-[#0bacfa] text-[.9rem] px-[.5rem] py-[0.3rem] rounded">Import</button>
-                                <button className="text-[#fff] border border-[#2ecd10] bg-[#2ecd10] px-[.5rem] py-[0.3rem] rounded">Add Question</button>
+                                <button 
+                                    className="text-[#fff] border border-[#2ecd10] bg-[#2ecd10] px-[.5rem] py-[0.3rem] rounded"
+                                    onClick={handleAdd}
+                                >Add Question</button>
                             </div>
                             <button onClick={handleBallotDropdown} className="flex items-center justify-center px-[1rem] py-[.3rem] rounded bg-[#e3e7ea] border border-[#e3e7ea] font-bold text-[1.3rem]"><FaEllipsisH /></button>
                             <div className={`mt-[.3rem] border  flex flex-col gap-3 px-[1rem] py-[.5rem] right-4 shadow absolute top-[5rem] bg-white ${ballotDropdown ? 'block' : 'hidden'}`}>
@@ -66,54 +98,60 @@ export default function Ballot() {
                         </div>
                         
                     </div>
-                    <div className="whitespace-normal bg-[#fff] mt-[.5rem] lg:mt-[1rem] rounded border w-[90%] lg:w-[60%] m-auto">
-                        <div className=" bg-[#f3f6f8] px-[1rem] border border-[#dee2e6] border-t-0 border-l-0 border-r-0">
-                            <div className="flex justify-between py-[.5rem]">
-                                <h1 className="text-[1.5rem] font-bold">Ballot Name</h1>
-                                <button className="bg-[#e3e7ea] px-[.5rem] py-[.7rem] rounded" onClick={handleQuestionDropdown}><FaEllipsisH /></button>
+                    {pageData && pageData.map((item, index) => (
+                        <div key={index} className="whitespace-normal bg-[#fff] mt-[.5rem] lg:mt-[1rem] rounded border w-[90%] lg:w-[60%] m-auto">
+                            <div className=" bg-[#f3f6f8] px-[1rem] border border-[#dee2e6] border-t-0 border-l-0 border-r-0">
+                                <div className="flex justify-between py-[.5rem]">
+                                    <h1 className="text-[1.5rem] font-bold">{item.title}</h1>
+                                    <button className="bg-[#e3e7ea] px-[.5rem] py-[.7rem] rounded" onClick={handleQuestionDropdown}><FaEllipsisH /></button>
 
-                                <div className={`mt-[.3rem] border top-[9rem] left-[17.813rem] flex flex-col gap-3 px-[1rem] py-[.5rem] shadow absolute  bg-white ${questionDropdown ? 'block' : 'hidden'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <FaEdit />
-                                        Edit
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <GrClear />
-                                        Clear
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <RiDeleteBin6Line />
-                                        Delete
+                                    <div className={`mt-[.3rem] border top-[9rem] left-[17.813rem] flex flex-col gap-3 px-[1rem] py-[.5rem] shadow absolute  bg-white ${questionDropdown ? 'block' : 'hidden'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <FaEdit />
+                                            Edit
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <GrClear />
+                                            Clear
+                                        </div>
+                                        <div 
+                                            className="flex items-center gap-3"
+                                            onClick={() => handleDeleteBallot(item.election_id, item.id)}
+                                        >
+                                            <RiDeleteBin6Line />
+                                            Delete
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="mt-[1rem] rounded px-[1rem] py-[.5rem] bg-[#fff] border border-[#dee2e6] -mb-px w-fit border-b-[#fff]">Options</div>
                             </div>
-                            <div className="mt-[1rem] rounded px-[1rem] py-[.5rem] bg-[#fff] border border-[#dee2e6] -mb-px w-fit border-b-[#fff]">Options</div>
-                        </div>
-                        <div className="w-[90%] m-auto  py-[1rem]">
-                            {!options && (
-                                <div className=" bg-[#ecf9ff] text-[#076796] rounded px-[1.25rem] py-[.75rem] text-[1.1rem] border border-[#c1eafe]">
-                                    Click the &quot;Add Options&quot; button below to add an options to this ballot
-                                </div>
-                            )}
-
-                            {options && (
-                                <div className="option flex items-center justify-between bg-[#f3f6f8] px-[1rem] py-[.5rem] rounded">
-                                    <div className="flex items-center gap-2">
-                                        <IoCheckmarkCircleSharp />
-                                        {'Options'}
+                            <div className="w-[90%] m-auto  py-[1rem]">
+                                {!options && (
+                                    <div className=" bg-[#ecf9ff] text-[#076796] rounded px-[1.25rem] py-[.75rem] text-[1.1rem] border border-[#c1eafe]">
+                                        Click the &quot;Add Options&quot; button below to add an options to this ballot
                                     </div>
-                                    <button></button>
-                                    <FaEllipsisH />
-                                </div>
-                            )}
+                                )}
+
+                                {options && (
+                                    <div className="option flex items-center justify-between bg-[#f3f6f8] px-[1rem] py-[.5rem] rounded">
+                                        <div className="flex items-center gap-2">
+                                            <IoCheckmarkCircleSharp />
+                                            {'Options'}
+                                        </div>
+                                        <button></button>
+                                        <FaEllipsisH />
+                                    </div>
+                                )}
+                                
                             
-                        
-                            <button onClick={handleAddOption} className="mt-[1rem] w-fit text-white font-semibold flex items-center gap-1 border-[#2ecd10] bg-[#2ecd10] px-[.5rem] py-[0.3rem] rounded">
-                                <IoMdAdd />
-                                Add Option
-                            </button>
+                                <button onClick={handleAddOption} className="mt-[1rem] w-fit text-white font-semibold flex items-center gap-1 border-[#2ecd10] bg-[#2ecd10] px-[.5rem] py-[0.3rem] rounded">
+                                    <IoMdAdd />
+                                    Add Option
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    ))}
+                    
                 </div>
             </div>
             <OptionModal
@@ -123,4 +161,13 @@ export default function Ballot() {
              />
         </>
     )
+};
+
+Ballot.propTypes = {
+    pageData: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+        })
+    ).isRequired,
+    addBallot: PropTypes.string.isRequired,
 }

@@ -40,7 +40,7 @@ export default function CreateElection() {
           start_date: response.data.message.start_date,
           end_date: response.data.message.end_date,
         });
-        navigate('/overview');
+        navigate(`/election/${response.data.id}/overview`);
         // setPageState(true);
       }
     } catch (err) {

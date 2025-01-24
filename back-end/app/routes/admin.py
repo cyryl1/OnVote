@@ -98,3 +98,55 @@ def get_vote_url():
     elif active_url['status'] == 'exception':
         return jsonify(active_url), 400
     return jsonify(active_url), 200
+
+@bp.post('election/create_ballot')
+# @jwt_required()
+def create_ballot():
+    data = request.get_json()
+    title = data.get('title')
+    election_id = data.get('election_id')
+    description = data.get('description')
+
+    ballot = admin.create_ballot(title, election_id, description)
+    if ballot['status'] == 'error':
+        return jsonify(ballot), 404
+    elif ballot['status'] == 'exception':
+        return jsonify(ballot), 400
+    else:
+        return jsonify(ballot), 201
+    
+@bp.get('election/<election_id>/get_ballots')
+def get_ballots(election_id):
+    ballots = admin.get_all_ballots(election_id)
+    if ballots['status'] == 'error':
+        return jsonify(ballots), 400
+    else:
+        return jsonify(ballots), 200
+    
+@bp.delete('election/<election_id>/delete_ballot/<id>')
+# @jwt_required()
+def delete_ballot(election_id, id):
+    ballot = admin.delete_ballot(election_id, id)
+    if ballot['status'] == 'error':
+        return jsonify(ballot), 404
+    elif ballot['status'] == 'exception':
+        return jsonify(ballot), 400
+    else:
+        return jsonify(ballot), 200
+    
+
+@bp.post('election/ballot/option')
+@jwt_required()
+def add_option():
+    data = request.get_json()
+    ballot_id = data.get('ballot_id')
+    title = data.get('title')
+    description = data.get('description')
+
+    option = admin.add_option(ballot_id, title, description)
+    if option['status'] == 'error':
+        return jsonify(option), 404
+    elif option['status'] == 'exception':
+        return jsonify(option), 400
+    else:
+        return jsonify(option), 201

@@ -10,6 +10,15 @@ class Ballot(db.Model):
     election = db.relationship('Election', backref='ballot')
     # total_votes = db.Column(db.Integer)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'election_id': self.election_id,
+            'election_title': self.election.title
+        }
+
     def save(self):
         db.session.add(self)
         db.session.commit()

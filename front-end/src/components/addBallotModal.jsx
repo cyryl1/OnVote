@@ -4,13 +4,15 @@ import Modal from "react-modal";
 import ToggleSwitch from "./toggleSwitch";
 import { RiDeleteBinFill } from "react-icons/ri";
 import BallotDeleteModal from "./ballotDeleteModal";
+// import axios from 'axios';
 
 Modal.setAppElement("#root"); //set app for accessibility
 
 
-export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
+export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
     const [randomEnabled, setRandomEnabled] = useState(false);
-    const [error, setError] = useState({});
+    const [formError, setFormError] = useState({});
+    // const [error, setError] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -19,17 +21,21 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
         random: '',
     })
 
+    // const [ballotId, setBallotId] = useState('');
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({...formData, [name]: value});
     }
+
+    
 
 
     const handleBallotSave = (e) => {
         e.preventDefault();
         // // handleBallotSave
         const newErrors = validate(formData);
-        setError(newErrors);
+        setFormError(newErrors);
         
         if (Object.keys(newErrors).length === 0) {
             if (randomEnabled) {
@@ -40,6 +46,7 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
             onSave(formData);
             onRequestClose();
             console.log(formData);
+            
         }
         // // Save
         
@@ -73,6 +80,7 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
     // }
 
     if (!isOpen) return null;
+    // if (error) return <p>{error}</p>
   return (
     <>
         <Modal
@@ -93,8 +101,8 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave }) {
                             <p>Voters can select only one option</p>
                         </div>
                         <div className="form-group mt-[1rem] flex flex-col gap-1">
-                            {error.ballotTitle && (
-                                <p className="text-red-600">{error.ballotTitle}</p>
+                            {formError.ballotTitle && (
+                                <p className="text-red-600">{formError.ballotTitle}</p>
                             )}
                             <label htmlFor="ballotTitle" className="text-[1rem] font-bold">Title</label>
                             <input type="text" onChange={handleChange} value={formData.ballotTitle} name="ballotTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" />
