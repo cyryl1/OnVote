@@ -1,4 +1,4 @@
-#OnVote
+# OnVote
 
 OnVote is a scalable and secure election management system designed to handle multiple elections, ballots, candidates, and voter participation. With a focus on flexibility and data integrity, OnVote ensures smooth and accurate election processes.
 
