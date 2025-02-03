@@ -30,9 +30,9 @@ def get_all_elections():
         return jsonify(elections), 500
     return jsonify(elections), 200
 
-@bp.get('/get_election/<id>')
-def get_election(id):
-    election = admin.get_election(id)
+@bp.get('/get_election/<election_id>')
+def get_election(election_id):
+    election = admin.get_election(election_id)
     if election['status'] == 'error':
         return jsonify(election), 404
     elif election['status'] == 'exception':
@@ -41,14 +41,14 @@ def get_election(id):
         return jsonify(election), 200
 
 
-@bp.put('/election/general_settings/<id>')
+@bp.put('/election/<election_id>/general_settings')
 @jwt_required()
-def election_general_settings(id):
+def election_general_settings(election_id):
     data = request.get_json()
     new_title = data.get('title')
     description = data.get('description')
 
-    response = admin.election_general_settings(id, new_title, description)
+    response = admin.election_general_settings(election_id, new_title, description)
     if response['status'] == 'error':
         return jsonify(response), 404
     elif response['status'] == 'exception':
@@ -56,14 +56,14 @@ def election_general_settings(id):
     else:
         return jsonify(response), 201
     
-@bp.put('/election/election_dates/<id>')
+@bp.put('/election/<election_id>/election_dates')
 @jwt_required()
-def election_dates(id):
+def election_dates(election_id):
     data = request.get_json()
     start_date = data.get('start_date')
     end_date = data.get('end_date')
 
-    response = admin.election_dates(id, start_date, end_date)
+    response = admin.election_dates(election_id, start_date, end_date)
     if response['status'] == 'error':
         return (response), 404
     elif response['status'] == 'exception':
@@ -71,10 +71,10 @@ def election_dates(id):
     else:
         return jsonify(response), 201
 
-@bp.delete('/election/delete/<id>')
+@bp.delete('/election/<election_id>/delete')
 @jwt_required()
-def delete_election(id):
-    response = admin.delete_election(id)
+def delete_election(election_id):
+    response = admin.delete_election(election_id)
 
     if response['status'] == 'error':
         return jsonify(response), 404
@@ -100,7 +100,7 @@ def get_vote_url():
         return jsonify(active_url), 500
     return jsonify(active_url), 200
 
-@bp.post('election/<election_id>/create_ballot')
+@bp.post('/election/<election_id>/create_ballot')
 # @jwt_required()
 def create_ballot(election_id):
     data = request.get_json()
@@ -117,7 +117,7 @@ def create_ballot(election_id):
     else:
         return jsonify(ballot), 201
     
-@bp.get('election/<election_id>/get_ballots')
+@bp.get('/election/<election_id>/get_ballots')
 def get_ballots(election_id):
     ballots = admin.get_all_ballots(election_id)
     if ballots['status'] == 'error':
@@ -126,6 +126,22 @@ def get_ballots(election_id):
         return jsonify(ballots), 500
     else:
         return jsonify(ballots), 200
+    
+@bp.put('/election/<election_id>/update_ballot')
+# @jwt_required()
+def update_ballot(election_id):
+    data = request.get_json()
+    ballot_id = data.get('ballot_id')
+    title = data.get('title')
+    description = data.get('description')
+
+    ballot = admin.update_ballot(election_id, ballot_id, title, description)
+    if ballot['status'] == 'error':
+        return jsonify(ballot), 404
+    elif ballot['status'] == 'exception':
+        return jsonify(ballot), 500
+    else:
+        return jsonify(ballot), 201
     
 @bp.delete('election/<election_id>/delete_ballot/<ballot_number>')
 # @jwt_required()
@@ -138,7 +154,7 @@ def delete_ballot(election_id, ballot_number):
     else:
         return jsonify(ballot), 200
 
-@bp.delete('election/<election_id>/delete_ballots')
+@bp.delete('/election/<election_id>/delete_ballots')
 # @jwt_required()
 def delete_ballots(election_id):
     ballots = admin.delete_all_ballot(election_id)
@@ -150,7 +166,7 @@ def delete_ballots(election_id):
         return jsonify(ballots), 200
     
 
-@bp.post('election/<election_id>/ballot/candidate')
+@bp.post('/election/<election_id>/ballot/candidate')
 # @jwt_required()
 def add_candidate(election_id):
     data = request.get_json()
@@ -166,7 +182,7 @@ def add_candidate(election_id):
     else:
         return jsonify(candidate), 201
     
-@bp.get('election/<election_id>/ballot/<ballot_id>/get_candidate')
+@bp.get('/election/<election_id>/ballot/<ballot_id>/get_candidates')
 # @jwt_required()
 def get_candidates(election_id, ballot_id):
     candidates = admin.get_candidates(election_id, ballot_id)
@@ -178,7 +194,7 @@ def get_candidates(election_id, ballot_id):
     else:
         return jsonify(candidates), 200
     
-@bp.put('election/<election_id>/ballot/<ballot_id>/update_candidate')
+@bp.put('/election/<election_id>/ballot/<ballot_id>/update_candidate')
 # @jwt_required()
 def update_candidate(election_id, ballot_id):
     data = request.get_json()
@@ -194,7 +210,7 @@ def update_candidate(election_id, ballot_id):
     else:
         return jsonify(candidate), 201
 
-@bp.delete('election/<election_id>/ballot/<ballot_id>/delete_candidate')
+@bp.delete('/election/<election_id>/ballot/<ballot_id>/delete_candidate')
 # @jwt_required()
 def delete_candidate(election_id, ballot_id):
     data = request.get_json()
@@ -209,7 +225,7 @@ def delete_candidate(election_id, ballot_id):
     else:
         return jsonify(candidate), 200
     
-@bp.delete('election/<election_id>/ballot/<ballot_id>/delete_candidates')
+@bp.delete('/election/<election_id>/ballot/<ballot_id>/delete_candidates')
 # @jwt_required()
 def delete_cadidates(election_id, ballot_id):
     candidates = admin.delete_candidates(election_id, ballot_id)

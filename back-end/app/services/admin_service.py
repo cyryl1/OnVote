@@ -266,6 +266,37 @@ class Admin_service:
                 "status": "error",
                 "message": "election not found"
             }
+
+    def update_ballot(self, election_id, ballot_id, title=None, description=None):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            existing_ballot = Ballot.query.filter_by(id=ballot_id).first()
+            if existing_ballot:
+                existing_ballot.title = title
+                existing_ballot.description = description
+
+                try:
+                    existing_ballot.save()
+
+                    return {
+                        "status": "success",
+                        "message": "updated successfully"
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            else:
+                return {
+                    "status": "error",
+                    "message": "Ballot not found"
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "Election not found"
+            }
             
     
         
@@ -352,7 +383,7 @@ class Admin_service:
             }
     
     def get_candidates(self, election_id, ballot_id):
-        election = Election.query.filter_by(id=election_id).firs()
+        election = Election.query.filter_by(id=election_id).first()
         if election:
             ballot = Ballot.query.filter_by(id=ballot_id).first()
             if ballot:
@@ -396,11 +427,11 @@ class Admin_service:
             if ballot:
                 candidate = Candidate.query.filter_by(id=candidate_id).first()
                 if candidate:
+                    candidate.title = title
+                    candidate.bio = bio
+
                     try:
-                        if title:
-                            candidate.title = title
-                        if bio:
-                            candidate.bio = bio
+                        candidate.save()
 
                         return {
                             "status": "success",

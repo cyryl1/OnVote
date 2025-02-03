@@ -12,6 +12,14 @@ class Candidate(db.Model):
     # Relatioships
     votes = db.relationship('Vote', backref='candidate', cascade='all, delete-orphan')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'ballot_id': self.ballot_id,
+            'bio': self.bio
+        }
+
 
     def save(self):
         db.session.add(self)
