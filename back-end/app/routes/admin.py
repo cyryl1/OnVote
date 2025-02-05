@@ -238,3 +238,40 @@ def delete_cadidates(election_id, ballot_id):
         return jsonify(candidates), 200
 
 
+@bp.post('/election/<election_id>/add_voter')
+# @jwt_required()
+def add_voter(election_id):
+    data = request.json()
+    voter_key = data.get('voter_key')
+    voter_password = data.get('voter_password')
+    has_voted = data.get('has_voted')
+
+    voter = admin.add_voter(election_id, voter_key, voter_password, has_voted)
+
+    if voter['status'] == 'error':
+        return jsonify(voter), 404
+    elif voter['status'] == 'exception':
+        return jsonify(voter), 500
+    else:
+        return jsonify(voter), 201
+    
+@bp.get('/election/<election_id>/get_voters')
+# @jwt_required()
+def get_voters(election_id):
+    voters = admin.get_voters(election_id)
+
+    if voters['status'] == 'error':
+        return jsonify(voters), 404
+    elif voters['status'] == 'exception':
+        return jsonify(voters), 500
+    else:
+        return jsonify(voters), 200
+    
+@bp.get('/get_voters_credentials')
+def generate_voter_credential():
+    voter_credentials = admin.generate_voter_credentials()
+
+    if voter_credentials['status'] == 'exception':
+        return jsonify(voter_credentials), 500
+    else:
+        return jsonify(voter_credentials), 200

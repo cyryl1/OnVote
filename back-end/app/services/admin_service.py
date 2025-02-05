@@ -2,6 +2,7 @@ from app.models.election_model import Election
 from app.models.ballot_model import Ballot
 from app.models.candidate_model import Candidate
 from datetime import datetime, timedelta
+from app.models.voter_model import Voter
 
 def is_active(start_time, end_time):
     format = "%Y/%m/%d %H:%M:%S"
@@ -552,4 +553,105 @@ class Admin_service:
                 "message": "election not found"
             }
 
+    def add_voter(self, election_id, voter_key, voter_password, has_voted=None):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            voter = Voter(election_id=election_id, voter_key=voter_key, voter_password=voter_password, has_voted=has_voted)
+
+            try:
+                voter.save()
+
+                return {
+                    "status": "success",
+                    "message": "voter added"
+                }
+            except Exception as e:
+                return {
+                    "status": "exception",
+                    "message": str(e)
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "Election not found"
+            }
         
+    def get_voters(self, election_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            try:
+                voters = Voter.query.filter_by(id=election_id).all()
+                if not voters:
+                    return {
+                        "status": "success",
+                        "message": []
+                    }
+                    
+                result = []
+                for voter in voters:
+                    voter_dict = voter.to_dict()
+                    result.append(voter_dict)
+                
+                return {
+                    "status": "success",
+                    "message": result
+                }
+            except Exception as e:
+                return {
+                    "status": "exception",
+                    "message": str(e)
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "Election not found"
+            }
+    
+    # def update_voter(self, election_id, voter_id, voter_email):
+    #     election = Election.query.filter_by(id=election_id).first()
+    #     if election:
+    #         voter = Voter.query.filter_by(id=voter_id).first()
+    #         if voter:
+    #             voter.voter_email = voter_email
+
+    #             try:
+    #                 voter.save()
+
+    #                 return {
+    #                     "status": "success",
+    #                     "message": "voter's credentials updated"
+    #                 }
+    #             except Exception as e:
+    #                 return {
+    #                     "status": "exception",
+    #                     "message": str(e)
+    #                 }
+    #         else:
+    #             return {
+    #                 "status": "error",
+    #                 "message": " Voter not found"
+    #             }
+    #     else:
+    #         return {
+    #             "status": "error",
+    #             "message": "election not found"
+    #         }
+
+
+        
+    def generate_voter_credentials(self):
+        try:
+            voter_key, voter_password = Voter.generate_credentials()
+            
+            return {
+                "status": "success",
+                "message": {
+                    "voter_key": voter_key,
+                    "voter_password": voter_password
+                }
+            }
+        except Exception as e:
+            return {
+                "status": "success",
+                "message": str(e)
+            }
