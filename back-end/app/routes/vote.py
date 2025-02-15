@@ -1,0 +1,55 @@
+from flask import request, jsonify, Blueprint
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.routes import vote
+from app.services.vote_service import Vote_service
+from app import db
+
+vote_bp = Blueprint('voter', __name__)
+vote_service = Vote_service(db)
+
+@vote_bp.post('/validate_voter')
+def validate_voter():
+    data = request.get_json()
+    voter_key = data.get('voter_key')
+    voter_password = data.get('voter_password')
+
+    voter = vote_service.validate_voter(voter_key, voter_password)
+
+    if voter['status'] == 'error':
+        return jsonify(voter), 404
+    else:
+        return jsonify(voter), 200
+
+@vote_bp.post('/election/<int:election_id>/cast_vote')
+# @jwt_required()
+def cast_vote(election_id):   
+    data = request.get_json()
+    voter_id = data.get('voter_id')
+    ballot_id = data.get('ballot_id')
+    candidate_id = data.get('candidate_id')
+    
+    vote = vote_service.cast_vote(voter_id, candidate_id, ballot_id, election_id)
+
+    if vote['status'] == 'error':
+        return jsonify(vote), 404
+    elif vote['status'] == 'exception':
+        return jsonify(vote), 500
+    else:
+        return jsonify(vote), 200
+
+@vote_bp.get('/elections/<int:election_id>/total_votes')
+def get_election_total_votes(election_id):
+    total_votes = vote_service.get_election_total_votes(election_id)
+
+    if total_votes['error'] == 'error':
+        return jsonify(total_votes), 404
+    return jsonify(total_votes), 200
+
+@vote_bp.get('/elections/<int:election_id>/candidate_votes')
+def get_election_candidate_votes(election_id):
+    candidate_votes = vote_service.get_election_candidate_votes(election_id)
+
+    if candidate_votes['error'] == 'error':
+        return jsonify(candidate_votes), 404
+    return jsonify(candidate_votes), 200
+  

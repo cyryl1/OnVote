@@ -224,6 +224,26 @@ class Admin_service:
                         "status": "exception",
                         "message": str(e)
                     }
+            elif existing_ballot.election_id != election_id:
+                ballot = Ballot(
+                    title=title, 
+                    description=description, 
+                    election_id=election_id
+                )
+                try:
+                    ballot.save()
+
+                    return {
+                        "status": "success",
+                        "message": "Ballot created successfully",
+                        "ballot_id": ballot.id,
+                        "election_id": ballot.election_id
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
             else:
                 return {
                     "status": "exists",
@@ -556,7 +576,8 @@ class Admin_service:
     def add_voter(self, election_id, voter_key, voter_password, has_voted=None):
         election = Election.query.filter_by(id=election_id).first()
         if election:
-            voter = Voter(election_id=election_id, voter_key=voter_key, voter_password=voter_password, has_voted=has_voted)
+            voter = Voter(election_id=election_id, voter_key=voter_key, has_voted=has_voted)
+            voter.set_voter_password(voter_password)
 
             try:
                 voter.save()
@@ -641,13 +662,13 @@ class Admin_service:
         
     def generate_voter_credentials(self):
         try:
-            voter_key, voter_password = Voter.generate_credentials()
+            credentials = Voter.generate_credentials()
             
             return {
                 "status": "success",
                 "message": {
-                    "voter_key": voter_key,
-                    "voter_password": voter_password
+                    "voter_key": credentials['voter_key'],
+                    "voter_password": credentials['voter_password']
                 }
             }
         except Exception as e:

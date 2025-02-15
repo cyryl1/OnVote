@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 from flask_cors import CORS
+# from app.extensions import db
 
 from config import Config
 
@@ -25,8 +26,12 @@ def create_app(config_class=Config):
     jwt.init_app(app)
 
     #initialize blueprints
-    from app.routes import bp
-    app.register_blueprint(bp, url_prefix="/onvote")
+    from app.routes.admin import admin_bp
+    from app.routes.vote import vote_bp
+    from app.routes.auth import auth_bp
+    app.register_blueprint(admin_bp, url_prefix="/onvote")
+    app.register_blueprint(vote_bp, url_prefix="/onvote")
+    app.register_blueprint(auth_bp, url_prefix="/onvote")
 
     
     @jwt.expired_token_loader

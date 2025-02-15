@@ -20,13 +20,13 @@ class Voter(db.Model):
     def generate_credentials(cls):
         voter_key = secrets.token_hex(8).upper()
         voter_password = secrets.token_urlsafe()
-        return cls(
-            # election_id=election_id,
-            voter_key=voter_key,
-            voter_password=generate_password_hash(voter_password)
-        ), voter_password
+        return {
+            "voter_key": voter_key,
+            "voter_password": voter_password
+        }
        
-    
+    def set_voter_password(self, voter_password):
+        self.voter_password=generate_password_hash(voter_password)
     def to_dict(self):
         return {
             "voter_id": self.id,
