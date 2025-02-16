@@ -86,46 +86,55 @@ class Vote_service:
         
         
     def get_election_total_votes(self, election_id):
-        election = Election.query.filter_by(election_id).first()
+        # Check if the election exists
+        election = Election.query.filter_by(id=election_id).first()
         if not election:
             return {
                 'status': 'error',
                 'message': 'Election not found'
             }
-        total_votes = self.db.session.query(self.db.func.count(Vote.id))\
-            .join(Ballot, Vote.ballot_id == Ballot.id)\
-            .filter(Ballot.election_id == election_id).scalar()
-        # total_votes = Ballot.query.filter_by(election_id=election_id).count()
+
+        # Count total votes for the election
+        total_votes = (
+            self.db.session.query(self.db.func.count(Vote.id))
+                .join(Ballot, Vote.ballot_id == Ballot.id)
+                .filter(Ballot.election_id == election_id)
+                .scalar()
+        )
+
+        # Return the result
         return {
             'status': 'success',
-            'total_votes': total_votes
+            'total_votes': total_votes or 0  # Ensure 0 is returned if no votes are found
         }
 
     def get_election_candidate_votes(self, election_id):
-        election = Election.query.filter_by(election_id).first()
+        election = Election.query.filter_by(id=election_id).first()
         if not election:
             return {
                 "status": "error",
                 "message": "Election not found"
             }
-        results = self.db.session.query(
-            Candidate.id,
-            Candidate.title,
-            Ballot.id.label('ballot_id'),
-            Ballot.title.label('ballot_title'),
-            self.db.func.count(Vote.id).label('votes')
-        ).join(
-            Ballot, Candidate.ballot_id == Ballot.id
-        ).outerjoin(
-            Vote, (Vote.candidate_id == Candidate.id) & (Vote.ballot_id == Ballot.id)
-        ).filter(
-            Ballot.election_id == election_id
-        ).group_by(
-            Candidate.id,
-            Candidate.title,
-            Ballot.id,
-            Ballot.title
-        ).all()
+        results = (
+            self.db.session.query(
+                Candidate.id,
+                Candidate.title.label('candidate_title'),
+                Ballot.id.label('ballot_id'),
+                Ballot.title.label('ballot_title'),
+                self.db.func.count(Vote.id).label('votes')
+            ).join(
+                Ballot, Candidate.ballot_id == Ballot.id
+            ).outerjoin(
+                Vote, (Vote.candidate_id == Candidate.id) & (Vote.ballot_id == Ballot.id)
+            ).filter(
+                Ballot.election_id == election_id
+            ).group_by(
+                Candidate.id,
+                Candidate.title,
+                Ballot.id,
+                Ballot.title
+            ).all()
+        )
 
         organized_results = {}
         for result in results:
@@ -139,18 +148,10 @@ class Vote_service:
 
             organized_results[ballot_id]['candidates'].append({
                 'candidate_id': result.id,
-                'candidate_name': result.title,
+                'candidate_name': result.candidate_title,
                 'votes': result.votes
             })
 
-        # candidates = [
-        #     {
-        #         'candidate_id': cand_id,
-        #         'candidate_name': cand_name,
-        #         'votes': votes
-        #     }
-        #     for cand_id, cand_name, votes in results
-        # ]
         return {
             'status': 'success',
             'ballots': list(organized_results.values())
