@@ -9,6 +9,7 @@ import { MdPreview } from "react-icons/md";
 import { FaDiceD20 } from "react-icons/fa";
 import { HiRocketLaunch } from "react-icons/hi2";
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 
 export default function Sidebar({ id }) {
@@ -17,9 +18,11 @@ export default function Sidebar({ id }) {
     // const { electionDetails} = useContext(TokenContext);
     return (
         <div  className='bg-[#1c2a39] h-full'>
-            <div className='bg-[#0bacfa] w-full px-[1rem] h-[3.6rem]'>
-                <img src={Logo} alt="logo" className='object-fit w-[100%] h-[100%]' />
-            </div>
+            <Link to='/dashboard'>
+                <div className='bg-[#0bacfa] w-full px-[1rem] h-[3.6rem]'>
+                    <img src={Logo} alt="logo" className='object-fit w-[100%] h-[100%]' />
+                </div>
+            </Link>
             <div className='mt-[0.5rem]'>
                 <div className='text-[#fff] font-semibold flex flex-col'>
                     <Link to={`/election/${id}/overview`}>
@@ -73,4 +76,8 @@ export default function Sidebar({ id }) {
             </div>
         </div>
     )
+}
+
+Sidebar.propTypes = {
+    id: PropTypes.number.isRequired,
 }

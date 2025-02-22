@@ -19,15 +19,16 @@ export const TokenProvider = ({ children }) => {
     const [name, setName] = useState(null);
 
     const [electionDetails, setElectionDetails] = useState({
+        id: 0,
         title: '',
         start_date: '',
         end_date: '',
     });
 
     const saveElectionDetails = (newDetails) => {
-        localStorage.setItem("election_title", newDetails.title);
-        localStorage.setItem("election_start_date", newDetails.start_date);
-        localStorage.setItem("election_end_date", newDetails.end_date);
+        localStorage.setItem(`${newDetails.id}_election_title`, newDetails.title);
+        localStorage.setItem(`${newDetails.id}_election_start_date`, newDetails.start_date);
+        localStorage.setItem(`${newDetails.id}_election_end_date`, newDetails.end_date);
 
         setElectionDetails(newDetails);
     }

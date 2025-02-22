@@ -1,69 +1,36 @@
 // import React from 'react'
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaUsers } from "react-icons/fa";
 import { FaEllipsisH } from "react-icons/fa";
 import { IoSearchSharp } from "react-icons/io5";
 import { TiExport } from "react-icons/ti";
+import PropTypes from "prop-types";
 
 export default function Voter({ form, onOpenModal }) {
 
-  const [data, setData] = useState([]);
+  // const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [dropDown, setDropDown] = useState(false);
-  // const [tableData, setTableData] = useState(false);
-  // const [filteredVoters, setFilteredVoters] = useState(voters);
-
-  // const searchVoters = (query) => {
-  //   if (!query.trim()) {
-  //     setFilteredVoters(voters);
-  //     return;
-  //   }
-
-  //   const searchParamter = ["name", "voter_id", "email"];
-  //   const lowercasedQuery = query.toLowerCase();
-
-  //   const results = voters.filter((voter) => 
-  //     searchParamter.some((parameter) =>
-  //       voter[parameter].toString().toLowerCase().includes(lowercasedQuery)
-  //     )
-  //   );
-  //   setFilteredVoters(results);
-  // };
-
-  // useEffect(() => {
-  //   searchVoters(query);
-  // }, [query, voters]);
 
   const handleDropdown = () => {
     setDropDown(!dropDown);
   }
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/users");
-      const result = await response.json();
-      setData(result);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch("https://jsonplaceholder.typicode.com/users");
+  //     const result = await response.json();
+  //     setData(result);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const search_parameter = Object.keys(Object.assign({}, ...data));
-
-  const search = (data) => {
-    return data.filter((data) => 
-      search_parameter.some((parameter) => 
-        data[parameter].toString().toLowerCase().includes(query)
-      )
-    );
-  };
-
-  // const displayedData = isSearch && query.trim() ? search(data) : data;
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
 
   return (
@@ -151,3 +118,8 @@ export default function Voter({ form, onOpenModal }) {
     </div>
   )
 }
+
+Voter.propTypes = {
+  form: PropTypes.object.isRequired,
+  onOpenModal: PropTypes.func.isRequired
+};

@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import Logo from '../assets/onvote-high-resolution-logo.svg';
+import Logo from '../components/logo';
 import { FaChevronCircleRight } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { TokenContext } from '../context/AuthContext';
@@ -36,6 +36,7 @@ export default function CreateElection() {
 
       if (response.status === 201 && response.data.message) {
         saveElectionDetails({
+          id: response.data.id,
           title: response.data.message.title,
           start_date: response.data.message.start_date,
           end_date: response.data.message.end_date,
@@ -45,6 +46,7 @@ export default function CreateElection() {
       }
     } catch (err) {
       setError(`Failed to load data: ${err.message || err}`);
+      console.log(err);
     }
   }
 
@@ -83,22 +85,29 @@ export default function CreateElection() {
 
   if (error) return <p>{error}</p>
   return (
-    <div className='flex flex-col items-center justify-center'>
-      <div>
+    <div className='flex flex-col items-center '>
+      {/* <div>
         <img src={Logo} alt="logo" className='h-[12rem]' />
+      </div> */}
+      <div className="flex justify-center items-center">
+          <Logo
+              imgWidth='4rem'
+              textSize='2rem'
+              color='black'
+          />
       </div>
-      <div className='text-center text-[3rem]'>Create a new Election</div>
+      <div className='text-center text-[2rem] font-semibold lg:font-bold text-gray-700 p-4'>Create a new Election</div>
 
-      <div className="mb-[12rem] w-[90%] lg:w-[40%] card-body p-[1rem] bg-[#fff] border border-[#dee2e6] mt-[1rem] rounded-sm">
-        <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+      <div className="card-body border-[#ced4da]-50 border-[1px] w-[90%] md:w-[40%] lg:w-[30%] m-auto rounded bg-white shadow-md">
+        <form onSubmit={handleSubmit} className='p-6 flex flex-col gap-3 lg:gap-[1rem]'>
           <div className="form-group flex flex-col gap-1">
-            <label className='font-bold'>Title</label>
+            <label className='font-semibold lg:font-bold text-gray-700'>Title</label>
             {errors.title && (
               <p className='text-red-500 text-[0.6rem]'>{errors.title}</p>
             )}
             <input
               type="text" 
-              className='bg-[#f6f8fa] text-[1.3rem] px-[0.5rem] border border-[#dee2e6] rounded-sm h-[2.5rem]'
+              className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
               placeholder='e.g Class President Election'
               onChange={handleChange}
               name='title'
@@ -106,33 +115,33 @@ export default function CreateElection() {
             />
           </div>
           <div className="form-group flex flex-col gap-1">
-            <label className='font-bold'>Start Date</label>
+            <label className='font-semibold lg:font-bold text-gray-700'>Start Date</label>
             {errors.start_date && (
               <p className='text-red-500 text-[0.6rem]'>{errors.start_date}</p>
             )}
             <input
               type="datetime-local" 
-              className='bg-[#f6f8fa] text-[1rem] px-[0.5rem] border border-[#dee2e6] rounded-sm h-[2.5rem]'
+              className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
               onChange={handleChange}
               name='start_date'
               value={formData.start_date}
             />
           </div>
           <div className="form-group flex flex-col gap-1">
-            <label className='font-bold'>End Date</label>
+            <label className='font-semibold lg:font-bold text-gray-700'>End Date</label>
             {errors.end_date && (
               <p className='text-red-500 text-[0.6rem]'>{errors.end_date}</p>
             )}
             <input
               type="datetime-local" 
-              className='bg-[#f6f8fa] text-[1rem] px-[0.5rem] border border-[#dee2e6] rounded-sm h-[2.5rem]'
+              className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
               onChange={handleChange}
               name='end_date'
               value={formData.end_date}
             />
           </div>
           <div className='w-fit'>
-            <button type='submit' className='flex items-center gap-3 text-[1.2rem]  text-[#fffc] px-[2rem] py-[.6rem] bg-[#2ecd10] border-[#2ecd10] rounded-sm'>
+            <button type='submit' className='flex items-center gap-3 text-[1.2rem] px-[2rem] py-[.6rem] bg-blue-600 border border-blue-600 text-[#fff] font-aemibold rounded h-10 hover:bg-blue-700 transition'>
               <span>Continue</span>
               <span><FaChevronCircleRight className=''/></span>
             </button>

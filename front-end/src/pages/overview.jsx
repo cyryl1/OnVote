@@ -33,7 +33,21 @@ export default function Overview() {
     const [electionUrl, setElectionURL] = useState(null);
     const [isUrlActive, setIsUrlActive]= useState(false);
 
-    const fetchUrl = async () => {
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+
+        const datePart = date.toISOString().slice(0, 10);
+
+        const timePart = date.toLocaleTimeString('en-US', {
+            hour12: true,
+            hour: "numeric",
+            minute: "2-digit",
+        });
+
+        return `${datePart} ${timePart}`;
+    }
+
+    const fetchUrl = async (id) => {
         try {
             const response = await axios.post(`http://127.0.0.1:5000/onvote/election_url`, {
                 id: id,
@@ -60,8 +74,8 @@ export default function Overview() {
             if (response.status === 200 && response.data.message) {
                 setElectionDetails({
                     electionTitle: response.data.message.title,
-                    startDate: response.data.message.start_date,
-                    endDate: response.data.message.end_date
+                    startDate: formatDateTime(response.data.message.start_date),
+                    endDate: formatDateTime(response.data.message.end_date)
                 });
 
                 localStorage.setItems(`election_${id}_startDate`, response.data.message.start_date);
@@ -72,7 +86,7 @@ export default function Overview() {
         }
     }
     useEffect(() => {
-        const fetchData = async (election_id) => {
+        const fetchData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
@@ -87,12 +101,12 @@ export default function Overview() {
                 //     fetchUrl(accessToken, election_id)
                 // ]);
 
-                console.log(election_id);
-                fetchPageData(accessToken, election_id);
-                console.log(election_id);
-                fetchUrl(accessToken)
+                console.log(id);
+                await fetchPageData(accessToken, id);
+                console.log(id);
+                await fetchUrl(id)
 
-                const interval = setInterval(fetchUrl, 30000) //Polls every 30 seconds
+                const interval = setInterval(fetchUrl(id), 30000) //Polls every 30 seconds
 
                 return () => clearInterval(interval); // clears interval after ever poll
                 
@@ -113,6 +127,8 @@ export default function Overview() {
     // if (error) return <p>{error}</p>
     console.log(error)
     console.log(electionDetails);
+
+    if (!id) return <p>Loading...</p>;
 
     return (
         <>

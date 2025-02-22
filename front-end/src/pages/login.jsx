@@ -1,9 +1,10 @@
 // import React from 'react'
-import Logo from '../assets/onvote-high-resolution-logo.svg';
+// import Logo from '../assets/onvote-high-resolution-logo.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useContext } from 'react';
 import { TokenContext } from '../context/AuthContext';
 import LoadingModal from '../components/loadingModal';
+import Logo from '../components/logo';
 
 export default function Login() {
     // const [accessToken, setAccessToken] = useState('');
@@ -50,6 +51,11 @@ export default function Login() {
                 }, 1000);
             }
 
+            if (response.status === 400) {
+                setMessage(result.message);
+                alert(result.message);
+            }
+
             if (response.status === 404) {
                 alert(result.message);
             }
@@ -94,31 +100,38 @@ export default function Login() {
 
 
     return (
-        <>
-            <div className="row text-[3rem] flex justify-center ">
+        <div className='flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-100 to-gray-200'>
+            {/* <div className="text-[3rem] flex justify-center ">
                 <img src={Logo} alt="OnVote" className="h-[10rem] lg:h-[15rem]" />
+            </div> */}
+            <div className="flex justify-center mt-auto">
+                <Logo
+                    imgWidth='4rem'
+                    textSize='2rem'
+                    color='black'
+                />
             </div>
-            <div className="card-body border-[#ced4da]-50 border-[1px] w-[90%] md:w-[40%] lg:w-[30%] m-auto rounded bg-[#fff]">
-                <form onSubmit={handleSubmit} className="p-[5%] flex flex-col gap-[0.5rem] lg:gap-[1rem]">
-                    <div className="form-group flex flex-col gap-[0.5rem]">
+            <div className="card-body border-[#ced4da]-50 border-[1px] w-[90%] md:w-[40%] lg:w-[30%] m-auto rounded bg-white shadow-md">
+                <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-3 lg:gap-[1rem]">
+                    <div className="form-group flex flex-col gap-1">
                         {errors.email && (
                             <p className='text-red-500 text-[0.6rem]'>{errors.email}</p>
                         )}
-                        <label htmlFor="email" className="font-semibold lg:font-bold">Email Address</label>
-                        <input type="text" value={formData.email} onChange={handleChange} name="email" className="border-[#ced4da] border-[1px] h-9 rounded bg-[#f6f8fa] p-[0.5rem]" />
+                        <label htmlFor="email" className="font-semibold lg:font-bold text-gray-700">Email Address</label>
+                        <input type="text" value={formData.email} onChange={handleChange} name="email" className="border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
-                    <div className="form-group flex flex-col gap-[0.5rem]">
+                    <div className="form-group flex flex-col gap-1">
                         {errors.password && (
                             <p className='text-red-500 text-[0.6rem]'>{errors.password}</p>
                         )}
-                        <label htmlFor="password" className="font-semibold lg:font-bold"><span>Password</span><span className="text-[0.6rem] lg:text-[0.7rem] float-right text-[#2b8357]">I CAN&apos;T REMEMBER</span></label>
-                        <input type="password" value={formData.password} onChange={handleChange} name="password" className="border-[#ced4da] border-[1px] h-9 rounded bg-[#f6f8fa] p-[0.5rem]" />
+                        <label htmlFor="password" className="font-semibold lg:font-bold text-gray-700 flex justify-between"><span>Password</span><span className="text-[0.5rem] lg:text-[0.7rem] hover:text-gray-700 cursor-pointer text-[#6c757d]">I CAN&apos;T REMEMBER</span></label>
+                        <input type="password" value={formData.password} onChange={handleChange} name="password" className="border border-[#ced4da] h-10 rounded px-3 bg-[#f6f8fa] focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
-                    <button type="submit" className="bg-[#2ecd10] border-[#2ecd10] border-[1px] text-[#fff] rounded h-9">Login</button>
+                    <button type="submit" className="bg-blue-600 border border-blue-600 text-[#fff] font-aemibold rounded h-10 hover:bg-blue-700 transition">Login</button>
                 </form>
             </div>
             <div className="m-auto text-center">
-                <Link to='/register' className="text-[1.4rem] text-[#2b8357] cursor-pointer">No account? Create one for free!</Link>
+                <Link to='/register' className="text-lg text-blue-600 cursor-pointer hover:underline">No account? Create one for free!</Link>
             </div>
 
             <LoadingModal 
@@ -126,6 +139,6 @@ export default function Login() {
                 onRequestClose={() => setIsLoading(!isLoading)}
                 onMessage={message}
             />
-        </>
+        </div>
     )
 }

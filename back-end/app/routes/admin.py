@@ -10,12 +10,13 @@ admin_service = Admin_service()
 @admin_bp.post('/election/create')
 @jwt_required()
 def create_election():
+    email = get_jwt_identity()
     data = request.get_json()
-    admin_id = data.get('admin_id')
+    # admin_id = data.get('admin_id')
     title = data.get('title')
     start_date = data.get('start_date')
     end_date = data.get('end_date')
-    election = admin_service.create_election(admin_id, title, start_date, end_date)
+    election = admin_service.create_election(email, title, start_date, end_date)
     if election['status'] == 'error':
         return jsonify(election), 400
     elif election['status'] == 'exception':
@@ -246,8 +247,10 @@ def add_voter(election_id):
     voter_key = data.get('voter_key')
     voter_password = data.get('voter_password')
     has_voted = data.get('has_voted')
+    voter_name = data.get("voter_name")
+    voter_email = data.get('voter_email')
 
-    voter = admin_service.add_voter(election_id, voter_key, voter_password, has_voted)
+    voter = admin_service.add_voter(election_id, voter_name, voter_email, voter_key, voter_password, has_voted)
 
     if voter['status'] == 'error':
         return jsonify(voter), 404

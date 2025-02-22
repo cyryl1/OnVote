@@ -1,6 +1,7 @@
 from app.models.election_model import Election
 from app.models.ballot_model import Ballot
 from app.models.candidate_model import Candidate
+from app.models.auth_model import Admin
 from datetime import datetime, timedelta
 from app.models.voter_model import Voter
 
@@ -15,21 +16,37 @@ class Admin_service:
     def __init__(self):
         pass
 
-    def create_election(self, admin_id, title, start_date, end_date, description=None):
+    DATE_FORMAT = "%Y-%m-%dT%H:%M"  # Define date format as a constant
+
+    def create_election(self, email, title, start_date, end_date, description=None):
+        if not all([title, start_date, end_date]):
+            return {
+                "status": "error",
+                "message": "title, start_date, ande end_date are required"
+            }
+        
+        admin = Admin.query.filter_by(email=email).first()
+        if not admin:
+            return {
+                "status": "error",
+                "message": "Admin not found"
+            }
+        admin_id = admin.id
+        
         election = Election.query.filter_by(title=title).first()
         if election:
             return {
                 "status": "ecrror",
                 "message": "Election already exists"
             }
-        date_format = "%Y-%m-%dT%H:%M"
+        # date_format = "%Y-%m-%dT%H:%M"
         try:
-            start = datetime.strptime(start_date, date_format)
-            end = datetime.strptime(end_date, date_format)
+            start = datetime.strptime(start_date, self.DATE_FORMAT)
+            end = datetime.strptime(end_date, self.DATE_FORMAT)
         except ValueError:
             return {
                 "status": "error",
-                "message": f"Invalid date format. Expected format: {date_format}"
+                "message": f"Invalid date format. Expected format: {self.DATE_FORMAT}"
             }
         print(start)
         print(end)
@@ -46,10 +63,13 @@ class Admin_service:
                 "status": "error",
                 "message": "The end date should be at least one hour from start date"
             }
-        if title is not None and start_date is not None and end_date is not None:
-            new_election = Election(admin_id=admin_id, title=title, start_date=start, end_date=end, description=description)
-        else:
-            raise ValueError('title, start_date, end_date is None')
+        new_election = Election(
+            admin_id=admin_id, 
+            title=title, 
+            start_date=start, 
+            end_date=end, 
+            description=description
+        )
         try:
             new_election.save()
             return {
@@ -57,8 +77,8 @@ class Admin_service:
                 "message": {
                     "admin_id": new_election.admin_id,
                     "title": new_election.title,
-                    "start_date": datetime.strftime(new_election.start_date, date_format),
-                    "end_date": datetime.strftime(new_election.end_date, date_format),
+                    "start_date": datetime.strftime(new_election.start_date, self.DATE_FORMAT),
+                    "end_date": datetime.strftime(new_election.end_date, self.DATE_FORMAT),
                     "description": new_election.description,
                     "candidates": []  # Return empty list instead of error when no candidates exist
                 },
@@ -87,7 +107,8 @@ class Admin_service:
                     if election_dict.get(date_field):
                         election_dict[date_field] = datetime.strftime(
                             election_dict[date_field],
-                            '%Y/%m/%d %H:%M:%S'
+                            # '%Y/%m/%d %H:%M:%S'
+                            self.DATE_FORMAT
                         )
                 result.append(election_dict)
 
@@ -114,8 +135,10 @@ class Admin_service:
                         "id": election.get('id'),
                         "title": election.get('title'),
                         "description": election.get('description'),
-                        "start_date": datetime.strftime(election['start_date'], '%Y/%m/%d %H:%M:%S'),
-                        "end_date": datetime.strftime(election['end_date'], '%Y/%m/%d %H:%M:%S'),
+                        # "start_date": datetime.strftime(election['start_date'], '%Y/%m/%d %H:%M:%S'),
+                        # "end_date": datetime.strftime(election['end_date'], '%Y/%m/%d %H:%M:%S'),
+                        "start_date": datetime.strftime(election['start_date'], self.DATE_FORMAT),
+                        "end_date": datetime.strftime(election['end_date'], self.DATE_FORMAT),
                     }
                 }
             else:
@@ -129,8 +152,8 @@ class Admin_service:
                 "message": f"Error retrieving election: {str(e)}"
             }
     
-    def election_general_settings(self, id, new_title, description):
-        election = Election.query.filter_by(id=id).first()
+    def election_general_settings(self, election_id, new_title, description):
+        election = Election.query.filter_by(id=election_id).first()
         print(description)
         if election:
             election.title = new_title
@@ -155,9 +178,9 @@ class Admin_service:
         
     def election_dates(self, id, start_date, end_date):
         election = Election.query.filter_by(id=id).first()
-        date_format = "%Y-%m-%dT%H:%M"
-        start = datetime.strptime(start_date, date_format)
-        end = datetime.strptime(end_date, date_format)
+        # date_format = "%Y-%m-%dT%H:%M"
+        start = datetime.strptime(start_date, self.DATE_FORMAT)
+        end = datetime.strptime(end_date, self.DATE_FORMAT)
         if election:
             election.start_date = start
             election.end_date = end
@@ -263,7 +286,8 @@ class Admin_service:
                 if not ballots:
                     return {
                         "status": "success",
-                        "message": []  # Return empty list instead of error when no ballots exist
+                        "message": [], # Return empty list instead of error when no ballots exist
+                        "election_title": election.title
                     }
                 
                 result = []
@@ -274,7 +298,8 @@ class Admin_service:
                 return {
                     "status": "success",
                     # "message": [ballot.to_dict() for election in ballots]
-                    "message": result
+                    "message": result,
+                    "election_title": election.title
                 }
 
             except Exception as e:
@@ -573,10 +598,16 @@ class Admin_service:
                 "message": "election not found"
             }
 
-    def add_voter(self, election_id, voter_key, voter_password, has_voted=None):
+    def add_voter(self, election_id, voter_name, voter_email, voter_key, voter_password, has_voted=None):
         election = Election.query.filter_by(id=election_id).first()
         if election:
-            voter = Voter(election_id=election_id, voter_key=voter_key, has_voted=has_voted)
+            voter = Voter(
+                election_id=election_id, 
+                voter_name=voter_name, 
+                voter_email=voter_email, 
+                voter_key=voter_key, 
+                has_voted=has_voted
+            )
             voter.set_voter_password(voter_password)
 
             try:
@@ -605,7 +636,8 @@ class Admin_service:
                 if not voters:
                     return {
                         "status": "success",
-                        "message": []
+                        "message": [],
+                        "election_title": election.title
                     }
                     
                 result = []
@@ -615,7 +647,8 @@ class Admin_service:
                 
                 return {
                     "status": "success",
-                    "message": result
+                    "message": result,
+                    "election_title": election.title
                 }
             except Exception as e:
                 return {

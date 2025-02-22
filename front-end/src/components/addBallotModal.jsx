@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import ToggleSwitch from "./toggleSwitch";
 import { RiDeleteBinFill } from "react-icons/ri";
 import BallotDeleteModal from "./ballotDeleteModal";
+import PropTypes from "prop-types";
 // import axios from 'axios';
 
 Modal.setAppElement("#root"); //set app for accessibility
@@ -142,4 +143,10 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
         />
     </>
   )
+}
+
+AddBallotModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onRequestClose: PropTypes.func.isRequired,
+    onSave: PropTypes.func.isRequired,
 }

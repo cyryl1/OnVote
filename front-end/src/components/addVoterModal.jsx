@@ -3,6 +3,7 @@ import { useState } from "react";
 import Modal from "react-modal";
 import { HiQuestionMarkCircle } from "react-icons/hi";
 import { CgDanger } from "react-icons/cg";
+import PropTypes from "prop-types";
 
 Modal.setAppElement("#root"); //set app for accessibility
 
@@ -149,4 +150,12 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave }) {
         </Modal>
     </>
   )
+}
+
+AddVoterModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onRequestClose: PropTypes.func.isRequired,
+    onSave: PropTypes.func.isRequired,
+    // randomEnabled: PropTypes.bool.isRequired,
+    // handleRandom: PropTypes.func.isRequired,
 }

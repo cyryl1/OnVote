@@ -28,13 +28,16 @@ export default function Dashboard() {
         const response = await axios.get('http://127.0.0.1:5000/onvote/get_all_elections', {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-        if (response.status === 200 && response.data.message) {
+        if (response.status === 200 && response.data.message && response.data.message.length > 0) {
           setData(response.data.message);
           setPageState(true);
+        } else {
+          setPageState(false);
         }
         
       } catch (err) {
         setError(`Failed to load data: ${err.message || err}`);
+        setPageState(false);
       } finally {
         setIsLoading(false);
       }
@@ -70,8 +73,8 @@ export default function Dashboard() {
 
       {pageState && (
         <div>
-          <div className='flex items-center justify-between px-[1rem] py-[1.5rem] border border-r-0 border-l-0 border-t-0 bg-[#fff]'>
-            <p className='text-[1.8em] font-bold'>Dashboard</p>
+          <div className='flex items-center justify-between lg:px-[4rem] px-[2rem] py-[1.5rem] border border-r-0 border-l-0 border-t-0 bg-[#fff]'>
+            <p className='lg:text-[1.8em] text-[1.4rem] font-bold'>Dashboard</p>
             <Link to='/election/create'>
               <button className='flex items-center gap-2 px-[.6rem] py-[.5rem] text-[.8rem] bg-[#2ecd10] border-[#2ecd10] rounded-sm text-[#fff]'>
                 <span><IoIosAddCircle className='w-[1.5rem] h-[1.5rem]'/></span>
@@ -86,7 +89,7 @@ export default function Dashboard() {
               // <p key={index}>{item.title}</p>
               <div 
                 key={index} 
-                className='flex flex-col lg:flex-row bg-white border p-[1rem] w-[90%] m-auto mt-[1rem]'
+                className='flex flex-col lg:flex-row bg-white border p-[1rem] w-[90%] m-auto mt-[1rem] border-[#ced4da]-50 rounded shadow-md cursor-pointer'
                 onClick={() => handleElectionClick(item.id)}
               >
                 <Link to={`election/${item.id}/overview`}>

@@ -40,8 +40,8 @@ export default function Settings() {
     
 
     const [dateFormData, setDateFormData] = useState({
-      start_date: '',
-      end_date: ''
+      start_date: electionDetails.startDate,
+      end_date: electionDetails.endDate
     })
 
     const handleGeneralChange = (e) => {
@@ -85,7 +85,7 @@ export default function Settings() {
           description: electionDetails.description,
         });
       }
-      if (electionDetails.electionTitle) {
+      if (electionDetails.startDate) {
         setDateFormData({
           start_date: electionDetails.startDate,
           end_date: electionDetails.endDate
@@ -98,7 +98,7 @@ export default function Settings() {
       e.preventDefault();
       const accessToken = localStorage.getItem('accessToken');
       try {
-        const response = await axios.put(`http://127.0.0.1:5000/onvote/election/general_settings/${id}`, JSON.stringify(generalFormData), {
+        const response = await axios.put(`http://127.0.0.1:5000/onvote/election/${id}/general_settings`, JSON.stringify(generalFormData), {
             headers: { 
               'Authorization': `Bearer ${accessToken}`, 
               'Content-Type': 'application/json'
@@ -117,7 +117,7 @@ export default function Settings() {
       e.preventDefault();
       const accessToken = localStorage.getItem('accessToken');
       try {
-        const response = await axios.put(`http://127.0.0.1:5000/onvote/election/election_dates/${id}`, JSON.stringify(dateFormData), {
+        const response = await axios.put(`http://127.0.0.1:5000/onvote/election/${id}/election_dates`, JSON.stringify(dateFormData), {
             headers: { 
               'Authorization': `Bearer ${accessToken}`,
               'Content-Type': 'application/json'
@@ -136,7 +136,7 @@ export default function Settings() {
       e.preventDefault();
       const accessToken = localStorage.getItem('accessToken');
       try {
-        const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/delete/${id}`, {
+        const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${id}/delete`, {
             headers: { 'Authorization': `Bearer ${accessToken}` },
         });
         if (response.status === 201 && response.data.message) {
@@ -154,9 +154,7 @@ export default function Settings() {
     return (
     <div className="relative">
       <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}>
-        <Sidebar 
-          id={id}
-        />
+        <Sidebar id={id} />
       </div>
       <div className={`whitespace-nowrap duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem]`}>
         <div className={`sticky top-0 bg-[#fff] flex whitespace-nowrap w-[100%] gap-[0.2rem] items-center border border-l-0 border-r-0 border-t-0 `}>
@@ -217,14 +215,21 @@ export default function Settings() {
                   <input 
                     type="datetime-local" 
                     name="start_date" 
-                    className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" onChange={handleDateChange} defaultValue={electionDetails.start_date || "Election start_date"} 
+                    className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" 
+                    onChange={handleDateChange} 
+                    value={dateFormData.start_date || "Election start_date"} 
                     
                   />
                 </div>
 
                 <div className="form-group flex flex-col gap-1 mt-[1rem]">
                   <label htmlFor="end_date" className="font-bold text-[0.8rem]">End Date</label>
-                  <input type="datetime-local" name="end_date" className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" onChange={handleDateChange} defaultValue={electionDetails.end_date || "Election end_date"} />
+                  <input 
+                  type="datetime-local" 
+                  name="end_date" 
+                  className="px-[1rem] py-[0.5rem] rounded bg-[#f6f8fa] border-[#ced4da]" 
+                  onChange={handleDateChange} 
+                  value={dateFormData.end_date || "Election end_date"} />
                 </div>
                 <button 
                   type="submit" 

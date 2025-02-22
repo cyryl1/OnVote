@@ -20,6 +20,7 @@ export default function Ballots() {
   // const [countBallot, setCountBallot] = useState(0);
   const [saveBallot, setSaveBallot] = useState(false);
   const [pageData, setPageData] = useState([]);
+  const [electionTitle, setElectionTitle] = useState('');
   
   // const navigate = useNavigate();
 
@@ -42,8 +43,10 @@ export default function Ballots() {
           'Authorization': `Bearer ${accessToken}`,
         },
       });
-      if (response.status === 200 && response.data.message) {
+      if (response.status === 200 && response.data.message && response.data.message.length > 0) {
         setPageData(response.data.message);
+        setElectionTitle(response.data.election_title);
+        console.log(response.data.message);
         setSaveBallot(true);
       }
     } catch (err) {
@@ -55,7 +58,7 @@ export default function Ballots() {
     try {
       const payload = { ...form, election_id: id };
       const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.post('http://127.0.0.1:5000/onvote/election/create_ballot', JSON.stringify(payload), {
+      const response = await axios.post(`http://127.0.0.1:5000/onvote/election/${id}/create_ballot`, JSON.stringify(payload), {
         headers: { 
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
@@ -96,7 +99,7 @@ export default function Ballots() {
                 <GiHamburgerMenu />
               </button>
             </div>
-            <div className="font-bold px-[1rem] py-[1rem]">{pageData["election_title"] || "Election Title"}</div>
+            <div className="font-bold px-[1rem] py-[1rem]">{electionTitle || "Election Title"}</div>
           </div>
           
           {!saveBallot && (
