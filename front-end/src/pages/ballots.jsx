@@ -12,15 +12,15 @@ import axios from 'axios';
 // import { useNavigate } from "react-router-dom";
 
 export default function Ballots() {
+  // const navigate = useNavigate();
   const { id } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [isActive, setIsActive] = useState(false);
-  // const { electionDetails } = useContext(TokenContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [countBallot, setCountBallot] = useState(0);
   const [saveBallot, setSaveBallot] = useState(false);
   const [pageData, setPageData] = useState([]);
   const [electionTitle, setElectionTitle] = useState('');
+  const [ballotToEdit, setBallotToEdit] = useState(null);
   
   // const navigate = useNavigate();
 
@@ -33,6 +33,7 @@ export default function Ballots() {
 
   const handleAddBallot = (bool) => {
     setIsModalOpen(bool);
+    setBallotToEdit(null);
   }
 
   const fetchBallot = async (election_id) => {
@@ -48,6 +49,8 @@ export default function Ballots() {
         setElectionTitle(response.data.election_title);
         console.log(response.data.message);
         setSaveBallot(true);
+      } else {
+        setElectionTitle(response.data.election_title);
       }
     } catch (err) {
       setError(`Error fetching ballot: ${err.message || err}`)
@@ -56,16 +59,29 @@ export default function Ballots() {
 
   const handleSave = async (form) => {
     try {
-      const payload = { ...form, election_id: id };
+      // const payload = { ...form, election_id: id };
       const accessToken = localStorage.getItem('accessToken');
-      const response = await axios.post(`http://127.0.0.1:5000/onvote/election/${id}/create_ballot`, JSON.stringify(payload), {
-        headers: { 
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-      });
+      let response;
+
+      if (ballotToEdit) {
+        response = await axios.put(`http://127.0.0.1:5000/onvote/election/${id}/update_ballot`, JSON.stringify({ ...form, ballot_id: ballotToEdit.id }), {
+          headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json'
+          },
+        });
+      } else {
+        response = await axios.post( `http://127.0.0.1:5000/onvote/election/${id}/create_ballot`, JSON.stringify({ ...form, election_id: id }), {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      }
 
       if (response.status === 201 && response.data.message) {
+        alert(response.data.message);
+        setIsModalOpen(false);
         fetchBallot(id);
       }
     
@@ -73,6 +89,13 @@ export default function Ballots() {
       setError(`Error saving ballot: ${err.message || err}`);
     }
     
+  };
+
+  const handleEditBallot = (ballot) => {
+    // console.log(ballot);
+    setBallotToEdit(ballot);
+    // console.log(ballotToEdit);
+    setIsModalOpen(true);
   }
 
   useEffect(() => {
@@ -120,7 +143,7 @@ export default function Ballots() {
                     onClick={handleAddBallot}
                   >
                     <IoMdAdd />
-                    Add Question
+                    Add Ballot
                   </button>
                 </div>
               </div>
@@ -130,6 +153,7 @@ export default function Ballots() {
             <Ballot
               pageData={pageData}
               addBallot={handleAddBallot}
+              onEditBallot={handleEditBallot}
             />
           )}
             
@@ -141,6 +165,8 @@ export default function Ballots() {
       isOpen={isModalOpen}
       onRequestClose={() => setIsModalOpen(false)}
       onSave={handleSave}
+      initialData={ballotToEdit}
+      isEditMode={!!ballotToEdit}
     />
   </>
 )}

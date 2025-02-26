@@ -168,7 +168,7 @@ def delete_ballots(election_id):
         return jsonify(ballots), 200
     
 
-@admin_bp.post('/election/<election_id>/ballot/candidate')
+@admin_bp.post('/election/<election_id>/ballot/add_candidate')
 # @jwt_required()
 def add_candidate(election_id):
     data = request.get_json()
@@ -212,11 +212,11 @@ def update_candidate(election_id, ballot_id):
     else:
         return jsonify(candidate), 201
 
-@admin_bp.delete('/election/<election_id>/ballot/<ballot_id>/delete_candidate')
+@admin_bp.delete('/election/<election_id>/ballot/<ballot_id>/delete_candidate/<candidate_id>')
 # @jwt_required()
-def delete_candidate(election_id, ballot_id):
-    data = request.get_json()
-    candidate_id = data.get('candidate_id')
+def delete_candidate(election_id, ballot_id, candidate_id):
+    # data = request.get_json()
+    # candidate_id = data.get('candidate_id')
 
     candidate = admin_service.delete_candidate(election_id, ballot_id, candidate_id)
 

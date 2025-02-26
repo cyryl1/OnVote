@@ -1,8 +1,8 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from 'react-router-dom';
 import Sidebar from "../components/sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { TokenContext } from "../context/AuthContext";
+// import { TokenContext } from "../context/AuthContext";
 import { FaUsers } from "react-icons/fa";
 import { FaCloudArrowUp } from "react-icons/fa6";
 import { IoMdAdd } from "react-icons/io";
@@ -14,12 +14,13 @@ export default function Voters() {
     const { id } = useParams();
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
-    const { electionDetails } = useContext(TokenContext);
+    // const { electionDetails } = useContext(TokenContext);
     const [openVoterModal, setOpenVoterModal] = useState(false);
     const [voters, setVoters] = useState([]);
     const [saveVoters, setSaveVoters] = useState(false);
 
     const [error, setError] = useState(null);
+    const [electionTitle, setElectionTitle] = useState('');
 
     // const [voters, setVoters] = useState([]);
     
@@ -44,7 +45,10 @@ export default function Voters() {
             if (response.status === 200 && response.data.message && response.data.message.length > 0) {
                 setVoters(response.data.message);
                 setSaveVoters(true);
+                setElectionTitle(response.data.election_title);
                 console.log(response.data.message);
+            } else {
+                setElectionTitle(response.data.election_title);
             }
         } catch (err) {
             setError(`Error fetching voters: ${err.message || err}`)
@@ -106,7 +110,7 @@ export default function Voters() {
                                 <GiHamburgerMenu />
                             </button>
                         </div>
-                        <div className="font-bold px-[1rem] py-[1rem]">{electionDetails.title || "Election Name"}</div>
+                        <div className="font-bold px-[1rem] py-[1rem]">{electionTitle || "Election Name"}</div>
                     </div>
                     <div className="whitespace-nowrap">
                         {!saveVoters && (

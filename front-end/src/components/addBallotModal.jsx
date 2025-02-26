@@ -1,5 +1,5 @@
 // import React from 'react'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "react-modal";
 import ToggleSwitch from "./toggleSwitch";
 import { RiDeleteBinFill } from "react-icons/ri";
@@ -10,23 +10,48 @@ import PropTypes from "prop-types";
 Modal.setAppElement("#root"); //set app for accessibility
 
 
-export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
+export default function AddBallotModal({ isOpen, onRequestClose, onSave, initialData, isEditMode }) {
     const [randomEnabled, setRandomEnabled] = useState(false);
     const [formError, setFormError] = useState({});
     // const [error, setError] = useState('');
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const [formData, setFormData] = useState({
-        ballotTitle: 'Ballot Title',
+    const initialFormData = {
+        title: 'Ballot Title',
         description: '',
         random: '',
-    })
+    };
+
+    const [formData, setFormData] = useState(initialFormData);
+
+    useEffect(() => {
+            console.log(isEditMode);
+            console.log(initialData);
+        if (isEditMode && initialData) {
+            setFormData({
+                title: initialData.title,
+                description: initialData.description,
+                random: '',
+            });
+        } else {
+            setFormData({
+                title: 'Ballot Title',
+                description: '',
+                random: '',
+            });
+        }
+    }, [isEditMode, initialData])
+
+    
 
     // const [ballotId, setBallotId] = useState('');
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({...formData, [name]: value});
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
     }
 
     
@@ -46,6 +71,7 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
             }
             onSave(formData);
             onRequestClose();
+            // setFormData(initialFormData);
             console.log(formData);
             
         }
@@ -55,8 +81,8 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
 
     const validate = (form) => {
         const errors = {}
-        if (!form.ballotTitle) {
-            errors.ballotTitle = 'Title is required';
+        if (!form.title) {
+            errors.title = 'Title is required';
         }
 
         return errors;
@@ -99,14 +125,14 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave}) {
                 <div className="px-[2rem] py-[1.5rem]">
                     <form action="">
                         <div className="form-group text-[1.2rem]">
-                            <p>Voters can select only one option</p>
+                            <p>Note: <em className="text-[1rem]">Voters can select only one Candidate</em></p>
                         </div>
                         <div className="form-group mt-[1rem] flex flex-col gap-1">
-                            {formError.ballotTitle && (
-                                <p className="text-red-600">{formError.ballotTitle}</p>
+                            {formError.title && (
+                                <p className="text-red-600">{formError.title}</p>
                             )}
-                            <label htmlFor="ballotTitle" className="text-[1rem] font-bold">Title</label>
-                            <input type="text" onChange={handleChange} value={formData.ballotTitle} name="ballotTitle" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" />
+                            <label htmlFor="title" className="text-[1rem] font-bold">Title</label>
+                            <input type="text" onChange={handleChange} value={formData.title} name="title" className="bg-[#f6f8fa] border px-[.5rem] text-[1.1rem] py-[.4rem] border-[#ced4da] rounded-sm" />
                         </div>
                         <div className="form-group flex flex-col gap-1 mt-[1rem]">
                             <label htmlFor="description" className="text-[1rem] font-bold">Description</label>
@@ -149,4 +175,6 @@ AddBallotModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onRequestClose: PropTypes.func.isRequired,
     onSave: PropTypes.func.isRequired,
+    initialData: PropTypes.object,
+    isEditMode: PropTypes.bool.isRequired
 }
