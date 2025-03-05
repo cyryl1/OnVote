@@ -15,7 +15,7 @@ export default function CreateElection() {
 
   const [errors, setErrors] = useState({});
   const { saveElectionDetails} = useContext(TokenContext);
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,8 +45,11 @@ export default function CreateElection() {
         // setPageState(true);
       }
     } catch (err) {
-      setError(`Failed to load data: ${err.message || err}`);
-      console.log(err);
+      if (err.response.status === 401 && err.response.data.status === "token_expired") {
+        navigate('/token_refresh');
+      } else {
+        console.error(`Failed to load: ${err.message || err}`);
+      }
     }
   }
 
@@ -83,7 +86,7 @@ export default function CreateElection() {
     return errors;
   }
 
-  if (error) return <p>{error}</p>
+  // if (error) return <p>{error}</p>
   return (
     <div className='flex flex-col items-center '>
       {/* <div>

@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.routes import auth
 from app.services.auth_service import AuthService
 from flask_cors import cross_origin
+from app.decorators import admin_required
 
 
 auth_bp = Blueprint('auth', __name__)
@@ -43,13 +44,18 @@ def login():
 @jwt_required(refresh=True)
 def refresh_user():
     current_user = get_jwt_identity()
-    refresh = auth_service.refresh(current_user)
-    if refresh['status'] == 'success':
-        return jsonify(refresh), 201
-    return jsonify(refresh), 401
+    data = request.get_json()
+    password = data.get('password')
+    refresh = auth_service.refresh(current_user, password)
+    if refresh['status'] == 'exception':
+        return jsonify(refresh), 500
+    elif refresh['status'] == 'error':
+        return jsonify(refresh), 400
+    return jsonify(refresh), 201
 
 @auth_bp.delete('/auth/delete')
 @jwt_required()
+@admin_required
 def delete():
     email = request.get_json().get('email')
     result = auth_service.delete_user(email)
@@ -57,11 +63,13 @@ def delete():
         return jsonify(result), 404
     return jsonify(result), 200
 
-@auth_bp.put('auth/update_general_profile')
+@auth_bp.put('/auth/update_general_profile')
 @jwt_required()
+@admin_required
 def update_general_profile():
-    new_email = request.form.get('email')
-    new_name = request.form.get('name')
+    data = request.get_json()
+    new_email = data.get('email')
+    new_name = data.get('name')
 
     email = get_jwt_identity()
 
@@ -72,16 +80,18 @@ def update_general_profile():
     return jsonify(result), 201
 
 
-@auth_bp.put('auth/update_password')
+@auth_bp.put('/auth/update_password')
 @jwt_required()
+@admin_required
 def update_password():
     email = get_jwt_identity()
-    current_password = request.form.get('current_password')
-    new_password = request.form.get('new_password')
+    data = request.get_json()
+    current_password = data.get('current_password')
+    new_password = data.get('new_password')
 
     result = auth_service.update_password(email, current_password, new_password)
     if result['message'] == 'Current password is incorrect':
-        return jsonify(result), 400
+        return jsonify(result), 403
     elif result['message'] == 'User not found':
         return jsonify(result), 404
     else:
@@ -89,6 +99,7 @@ def update_password():
 
 @auth_bp.get('/auth/profile')
 @jwt_required()
+@admin_required
 def check_profile():
     email = get_jwt_identity()
 

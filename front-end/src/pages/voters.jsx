@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from "../components/sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
 // import { TokenContext } from "../context/AuthContext";
@@ -9,9 +9,11 @@ import { IoMdAdd } from "react-icons/io";
 import AddVoterModal from "../components/addVoterModal";
 import Voter from "./voter";
 import axios from 'axios';
+import LoadingModal from '../components/loadingModal';
 
 export default function Voters() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     // const { electionDetails } = useContext(TokenContext);
@@ -19,8 +21,10 @@ export default function Voters() {
     const [voters, setVoters] = useState([]);
     const [saveVoters, setSaveVoters] = useState(false);
 
-    const [error, setError] = useState(null);
+    // const [error, setError] = useState(null);
     const [electionTitle, setElectionTitle] = useState('');
+    const [voterToEdit, setVoterToEdit] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // const [voters, setVoters] = useState([]);
     
@@ -30,12 +34,14 @@ export default function Voters() {
         setIsActive(!isActive);
     }
 
-    const handleAddVoter = () => {
-        setOpenVoterModal(true);
+    const handleAddVoter = (bool) => {
+        setOpenVoterModal(bool);
+        setVoterToEdit(null);
     }
 
     const fetchVoters = async (election_id) => {
         try {
+            setIsLoading(true);
             const accessToken = localStorage.getItem('accessToken');
             const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${election_id}/get_voters`, {
                 headers: {
@@ -51,48 +57,66 @@ export default function Voters() {
                 setElectionTitle(response.data.election_title);
             }
         } catch (err) {
-            setError(`Error fetching voters: ${err.message || err}`)
+            // setError(`Error fetching voters: ${err.message || err}`)
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        } finally {
+            setIsLoading(false);
         }
     }
 
     const handleVoterSave = async (form) => {
-        // if (form) {
-        //     setFormData({
-        //         voter_name: form.voter_name,
-        //         voter_id: form.voter_id,
-        //         voter_key: form.voter_key,
-        //         voter_email: form.voter_email,
-        //     })
-        //     console.log(form);
-        //     setAddVoters(true);
-        // }
-        // setVoters((prevvoters) => [...prevvoters, newVoter]);
-        // console.log(newVoter);
-        // setAddVoters(true);
-        // console.log(voters);
         try {
-            const payload = { ...form };
+            setIsLoading(true);
             const accessToken = localStorage.getItem('accessTooken');
-            const response = await axios.post(`http://127.0.0.1:5000/onvote//election/${id}/add_voter`, JSON.stringify(payload), {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            let response;
+            console.log(form);
+            console.log(voterToEdit)
+            if (voterToEdit) {
+                response = await axios.put(`http://127.0.0.1:5000/onvote/election/${id}/update_voter/${voterToEdit.voter_id}`, JSON.stringify({ ...form }), {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } else {
+                response = await axios.post(`http://127.0.0.1:5000/onvote/election/${id}/add_voter`, JSON.stringify({ ...form }), {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+            }
 
             if (response.status === 201 && response.data.message) {
+                alert(response.data.message);
                 fetchVoters(id);
             }
         } catch (err) {
-            setError(`Error saving ballot: ${err.message || err}`)
+            // setError(`Error saving ballot: ${err.message || err}`)
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        } finally {
+            setIsLoading(false);
         }
+    }
+
+    const handleEditVoter = (voter) => {
+        setVoterToEdit(voter);
+        setOpenVoterModal(true);
     }
 
     useEffect(() => {
         fetchVoters(id);
     }, [id])
 
-    if (error) return <p>{error}</p>
+    // if (error) return <p>{error}</p>
 
     return (
         <>
@@ -140,7 +164,8 @@ export default function Voters() {
                         {saveVoters && (
                             <Voter
                                 form={voters}
-                                onOpenModal={handleAddVoter}
+                                addVoter={handleAddVoter}
+                                onEditVoter={handleEditVoter}
                              />
                         )}
                         
@@ -153,6 +178,13 @@ export default function Voters() {
                 isOpen={openVoterModal}
                 onRequestClose={() => setOpenVoterModal(false)}
                 onSave={handleVoterSave}
+                initialData={voterToEdit}
+                isEditMode={!!voterToEdit}
+            />
+
+            <LoadingModal 
+                isOpen={isLoading}
+                onRequestClose={() => setIsLoading(!isLoading)}
             />
         </>
     )

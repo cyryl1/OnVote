@@ -11,23 +11,36 @@ class Vote_service:
         self.db = db
 
 
-    def validate_voter(self, voter_key, voter_password):
-        voter = Voter.query.filter_by(voter_key=voter_key).first()
-        if not voter:
+    def validate_voter(self, election_id, voter_key, voter_password):
+        election = Election.query.filter_by(id=election_id).first()
+
+        if election:
+            voter = Voter.query.filter_by(voter_key=voter_key).first()
+            if not voter:
+                return {
+                    "status": "error",
+                    "message": "voter not found"
+                }
+            if voter.has_voted:
+                return {
+                    "status": "error",
+                    "message": "Already Voted"
+                }
+            check_password = voter.check_voter_password(voter_password)
+            if voter and check_password:
+                return {
+                    "status": "success",
+                    "message": "voter authenticated"
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": "invalid password"
+                }
+        else: 
             return {
                 "status": "error",
-                "message": "voter not found"
-            }
-        check_password = voter.check_voter_password(voter_password)
-        if voter and check_password:
-            return {
-                "status": "success",
-                "message": "voter authenticated"
-            }
-        else:
-            return {
-                "status": "error",
-                "message": "invalid password"
+                "message": "election not found"
             }
         
     def cast_vote(self, voter_id, candidate_id, ballot_id, election_id):

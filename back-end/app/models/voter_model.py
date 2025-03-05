@@ -12,7 +12,6 @@ class Voter(db.Model):
     voter_email = db.Column(db.String(150), nullable=False)
     voter_key = db.Column(db.String(150), unique=True, nullable=False)
     voter_password = db.Column(db.String(150), nullable=False)
-    # voter_email = db.Column(db.String(150), nullable=False)
     has_voted = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -27,8 +26,8 @@ class Voter(db.Model):
             "voter_password": voter_password
         }
        
-    def set_voter_password(self, voter_password):
-        self.voter_password=generate_password_hash(voter_password)
+    # def set_voter_password(self, voter_password):
+    #     self.voter_password=generate_password_hash(voter_password)
     def to_dict(self):
         return {
             "voter_id": self.id,
@@ -41,7 +40,8 @@ class Voter(db.Model):
         }
     
     def check_voter_password(self, voter_password):
-        return check_password_hash(self.voter_password, voter_password)
+        # return check_password_hash(self.voter_password, voter_password)
+        return self.voter_password == voter_password
 
     def save(self):
         db.session.add(self)

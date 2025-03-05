@@ -12,7 +12,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   // const [elec, setElec] = useState(false);
   const [data, setData] = useState([]);
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [pageState, setPageState] = useState(false);
 
@@ -34,9 +34,27 @@ export default function Dashboard() {
         } else {
           setPageState(false);
         }
+
         
       } catch (err) {
-        setError(`Failed to load data: ${err.message || err}`);
+        console.log(err);
+        if (err.response) {
+          if (err.response.status === 401) {
+            console.log('Unauthorized error details:', err.response.data);
+
+            if (err.response.data.status === "token_expired" || err.response.data.message.includes("Token has expired")) {
+              navigate('/token_refresh');
+            } else {
+              console.error('Unauthrized access:', err.response.data);
+            }
+          } else {
+            console.error(`HTTP error: ${err.response.status}`);
+          }
+        } else if (err.request) {
+          console.error('No response recieved:', err.request);
+        } else {
+          console.error('Error setting up request:', err.message);
+        }
         setPageState(false);
       } finally {
         setIsLoading(false);
@@ -46,7 +64,7 @@ export default function Dashboard() {
   }, [])
   console.log(data);
 
-  if (error) return <p>{error}</p>
+  // if (error) return <p>{error}</p>
   // if (!data) return (() => setIsLoading(true))
 
   return (
@@ -116,9 +134,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-       <LoadingModal 
-          isOpen={isLoading}
-          onRequestClose={() => setIsLoading(!isLoading)}
+      <LoadingModal 
+        isOpen={isLoading}
+        onRequestClose={() => setIsLoading(!isLoading)}
       />
     </>
   )

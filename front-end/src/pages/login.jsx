@@ -46,6 +46,7 @@ export default function Login() {
                     accessToken: result.tokens.access,
                     resetToken: result.tokens.reset
                 });
+                localStorage.setItem('admin_name', result.name);
                 setTimeout(() => {
                     navigate('/dashboard');
                 }, 1000);

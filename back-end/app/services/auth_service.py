@@ -1,7 +1,23 @@
 from app.models.auth_model import Admin
 import bcrypt
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, decode_token
 
+
+def is_valid_refresh_token(refresh_token, user_email):
+    try:
+        decoded_token = decode_token(refresh_token)
+
+        if decoded_token['sub'] != user_email:
+            return False
+        
+        if decode_token.get('type') != 'refresh':
+            return False
+        
+        return True
+    
+    except Exception as e:
+        print( f"Token vslidation error: {str(e)}")
+        return False
 
 class AuthService:
     def __init__(self):
@@ -25,31 +41,34 @@ class AuthService:
 
     def validate_user(self, email, password):
         admin = Admin.query.filter_by(email=email).first()
-        if not admin:
-            return {"status": "error", "message": "User not found"}
+        # if not admin:
+        #     return {"status": "error", "message": "User not found"}
         check_password = admin.check_password(password)
         if admin and check_password:
             return {
                 "status": "success",
                 "message": "Logged in successfully",
                 "tokens": {
-                    "access": create_access_token(identity=admin.email),
+                    "access": create_access_token(identity=admin.email, additional_claims={"role": "admin"}),
                     "reset": create_refresh_token(identity=admin.email)
-                }
+                },
+                "name": admin.name
             }
         else:
             return {"status": "error", "message": "Invalid email or password"}
         
-    def refresh(current_user):
+    def refresh(current_user, password):
         try:
-            new_access_token = create_access_token(identity=current_user)
-            return{
-                "status": "success",
-                "message": "token refreshed",
-                "token": {
-                    'access': new_access_token
+            admin = Admin.query.filter_by(email=current_user).first()
+            if admin.check_password(password):
+                new_access_token = create_access_token(identity=current_user, additional_claims={"role": "admin"})
+                return {
+                    "status": "success",
+                    "message": "token refreshed",
+                    "token": new_access_token
                 }
-            }
+            else:
+                return {"status": "error", "message": "Invalid password"}
         except Exception as e:
             return {
                 "status": "exception",
@@ -88,19 +107,25 @@ class AuthService:
             try:
                 admin.save()
 
-                new_token = create_access_token(identity=new_email)
-                return {
-                    "status": "success", 
-                    "message": "profile updated successfully", 
-                    "new_token": new_token
-                }
+                if email != new_email:
+                    new_token = create_access_token(identity=new_email)
+                    return {
+                        "status": "success", 
+                        "message": "profile updated successfully", 
+                        "new_token": new_token
+                    }
+                else:
+                    return {
+                        "status": "success", 
+                        "message": "profile updated successfully",
+                    }
             except Exception as e:
                 return {
                     "status": "error",
                     "message": str(e)
                 }
         return {
-            "status": "error",
+            "status": "error", 
             "message": "User not found"
         }
     
@@ -109,7 +134,7 @@ class AuthService:
         if admin:
             check_password = admin.check_password(current_password)
             if check_password:
-                admin.password = new_password
+                admin.set_password(new_password)
                 try:
                     admin.save()
                     return {

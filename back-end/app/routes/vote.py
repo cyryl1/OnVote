@@ -7,13 +7,13 @@ from app import db
 vote_bp = Blueprint('voter', __name__)
 vote_service = Vote_service(db)
 
-@vote_bp.post('/validate_voter')
-def validate_voter():
+@vote_bp.post('/election/<int:election_id>/validate_voter')
+def validate_voter(election_id):
     data = request.get_json()
     voter_key = data.get('voter_key')
     voter_password = data.get('voter_password')
 
-    voter = vote_service.validate_voter(voter_key, voter_password)
+    voter = vote_service.validate_voter(election_id, voter_key, voter_password)
 
     if voter['status'] == 'error':
         return jsonify(voter), 404

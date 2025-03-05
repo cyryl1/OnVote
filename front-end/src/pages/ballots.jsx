@@ -9,7 +9,8 @@ import AddBallotModal from "../components/addBallotModal";
 import Ballot from "./ballot";
 import { useParams } from "react-router-dom";
 import axios from 'axios';
-// import { useNavigate } from "react-router-dom";
+import LoadingModal from '../components/loadingModal';
+import { useNavigate } from "react-router-dom";
 
 export default function Ballots() {
   // const navigate = useNavigate();
@@ -21,10 +22,12 @@ export default function Ballots() {
   const [pageData, setPageData] = useState([]);
   const [electionTitle, setElectionTitle] = useState('');
   const [ballotToEdit, setBallotToEdit] = useState(null);
-  
-  // const navigate = useNavigate();
 
-  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const navigate = useNavigate();
+
+  // const [error, setError] = useState('');
 
   const handleButtonChange = () => {
       setIsOpen(!isOpen);
@@ -38,6 +41,7 @@ export default function Ballots() {
 
   const fetchBallot = async (election_id) => {
     try {
+      setIsLoading(true);
       const accessToken = localStorage.getItem('accessToken');
       const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${election_id}/get_ballots`, {
         headers: { 
@@ -53,12 +57,19 @@ export default function Ballots() {
         setElectionTitle(response.data.election_title);
       }
     } catch (err) {
-      setError(`Error fetching ballot: ${err.message || err}`)
+      if (err.response.status === 401 && err.response.data.status === "token_expired") {
+        navigate('/token_refresh');
+    } else {
+        console.error(`Failed to load: ${err.message || err}`);
+    }
+    } finally {
+      setIsLoading(false);
     }
   }
 
   const handleSave = async (form) => {
     try {
+      setIsLoading(true);
       // const payload = { ...form, election_id: id };
       const accessToken = localStorage.getItem('accessToken');
       let response;
@@ -86,7 +97,13 @@ export default function Ballots() {
       }
     
     } catch (err) {
-      setError(`Error saving ballot: ${err.message || err}`);
+      if (err.response.status === 401 && err.response.data.status === "token_expired") {
+        navigate('/token_refresh');
+      } else {
+          console.error(`Failed to load: ${err.message || err}`);
+      }
+    }  finally {
+      setIsLoading(false);
     }
     
   };
@@ -102,7 +119,7 @@ export default function Ballots() {
     fetchBallot(id);
   }, [id])
 
-  if (error) return <p>{error}</p>;
+  // if (error) return <p>{error}</p>;
 
   return (
     <>
@@ -168,5 +185,10 @@ export default function Ballots() {
       initialData={ballotToEdit}
       isEditMode={!!ballotToEdit}
     />
+
+     <LoadingModal 
+        isOpen={isLoading}
+        onRequestClose={() => setIsLoading(!isLoading)}
+      />
   </>
 )}

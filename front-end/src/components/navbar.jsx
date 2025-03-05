@@ -1,13 +1,14 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import Logo from '../components/logo';
 import { Link } from 'react-router-dom';
 import { IoMdMail } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
-import { TokenContext } from '../context/AuthContext';
+// import { TokenContext } from '../context/AuthContext';
 
 export default function Dashboard() {
   const [isOpen, setIsOpen] = useState(false);
-  const { name } = useContext(TokenContext);
+//   const { name } = useContext(TokenContext);
+  const admin_name = localStorage.getItem('admin_name');
 
   return (
     <nav className='flex items-center justify-end gap-6 lg:justify-between flex-row-reverse flex-wrap px-[2rem] lg:flex-row lg:px-[3.5rem] lg:py-[1rem] bg-[#0bacfa]'>
@@ -54,7 +55,7 @@ export default function Dashboard() {
                 </div>
                 <div className='flex gap-1 font-bold text-[1rem] items-center'>
                     <FaUser />
-                    <p className=''>{name || "Guest"}!</p>
+                    <p className=''>{admin_name || "Guest"}!</p>
                 </div>
             </div>
         </div>

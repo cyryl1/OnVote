@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from "../components/sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
 // import { TokenContext } from "../context/AuthContext";
@@ -17,6 +17,7 @@ import axios from 'axios';
 
 export default function Overview() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isActive, setIsActive] = useState(false);
     // const { electionDetails } = useContext(TokenContext);
@@ -27,7 +28,12 @@ export default function Overview() {
         endDate: "",
     })
 
-    const [error, setError] = useState('');
+    const [totalVoters, setTotalVoters] = useState(0);
+    const [totalBallots, setTotalBallots] = useState(0);
+    const [totalCandidates, setTotalCandidates] = useState(0);
+    const [copied, setCopied] = useState(false);
+
+    // const [error, setError] = useState('');
     // const socket = io("http://localhost:5000")
 
     const [electionUrl, setElectionURL] = useState(null);
@@ -47,13 +53,25 @@ export default function Overview() {
         return `${datePart} ${timePart}`;
     }
 
+    const formatDateForUrl = (dateString) => {
+        const date = new Date(dateString);
+        return date.toISOString().slice(0, 19).replace('T', ' ').replace(/-/g, '/');
+    };
+
+
+    
+
     const fetchUrl = async (id) => {
+        console.log(electionDetails);
         try {
+            const formattedStartDate = formatDateForUrl(electionDetails.startDate);
+            const formattedEndDate = formatDateForUrl(electionDetails.endDate);
             const response = await axios.post(`http://127.0.0.1:5000/onvote/election_url`, {
                 id: id,
-                start_date: electionDetails.startDate,
-                end_date: electionDetails.endDate
+                start_date: formattedStartDate,
+                end_date: formattedEndDate
             });
+        
             
             if (response.status === 200 && response.data.message) {
                 setElectionURL(response.data.message);
@@ -62,12 +80,18 @@ export default function Overview() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         } catch (err) {
-            setError(`Failed to load: ${err.message || err}`);
+            // setError(`Failed to load: ${err.message || err}`);
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
         }
     }
 
     const fetchPageData = async (accessToken, id) => {
         try {
+            setIsLoading(true);
             const response = await axios.get(`http://127.0.0.1:5000/onvote/get_election/${id}`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
@@ -82,14 +106,21 @@ export default function Overview() {
                 localStorage.setItem(`election_${id}_endDate`, response.data.message.end_date);
             }
         } catch (err) {
-            setError(`Failed to load: ${err.message || err}`);
+            // setError(`Failed to load: ${err.message || err}`);
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        } finally {
+            setIsLoading(false);
         }
     }
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                setError(null);
+                // setError(null);
 
                 const accessToken = localStorage.getItem('accessToken');
                 if (!accessToken) {
@@ -101,22 +132,98 @@ export default function Overview() {
                 //     fetchUrl(accessToken, election_id)
                 // ]);
 
-                console.log(id);
+                // console.log(id);
                 await fetchPageData(accessToken, id);
                 console.log(id);
-                await fetchUrl(id)
+                // await fetchUrl(id)
 
-                const interval = setInterval(fetchUrl(id), 30000) //Polls every 30 seconds
+                const interval = setInterval(() => fetchUrl(id), 30000) //Polls every 30 seconds
 
                 return () => clearInterval(interval); // clears interval after ever poll
                 
             } catch (err) {
-                setError(`Failed to load data: ${err.message || err}`);
+                // setError(`Failed to load data: ${err.message || err}`);
+                if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                    navigate('/token_refresh');
+                } else {
+                    console.error(`Failed to load: ${err.message || err}`);
+                }
             } finally {
-            setIsLoading(false);
+                setIsLoading(false);
             }
         };
-        fetchData(id);
+        fetchData();
+    }, [id])
+
+    const fetchBallot = async () => {
+        try {
+          setIsLoading(true);
+          const accessToken = localStorage.getItem('accessToken');
+          const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${id}/get_ballots`, {
+            headers: { 
+              'Authorization': `Bearer ${accessToken}`,
+            },
+          });
+          if (response.status === 200 && response.data.message && response.data.message.length > 0) {
+            setTotalBallots(response.data.message.length);
+          } 
+        } catch (err) {
+          // setError(`Error fetching ballot: ${err.message || err}`)
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        } 
+    }
+
+
+    const fetchVoters = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${id}/get_voters`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            if (response.status === 200 && response.data.message && response.data.message.length > 0) {
+                setTotalVoters(response.data.message.length);
+            } 
+        } catch (err) {
+            // setError(`Error fetching voters: ${err.message || err}`)
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        } 
+    }
+
+    const fetchCandidates = async () => {
+        try {
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${id}/total_candidates`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+            });
+            if (response.status === 200 && response.data.message) {
+                setTotalCandidates(response.data.message);
+                console.log(totalCandidates)
+            }
+        } catch (err) {
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
+        }
+    }
+
+    useEffect(() => {
+        fetchBallot();
+        fetchVoters();
+        fetchCandidates();
     }, [id])
     
 
@@ -125,8 +232,8 @@ export default function Overview() {
         setIsActive(!isActive);
     }
     // if (error) return <p>{error}</p>
-    console.log(error)
-    console.log(electionDetails);
+    // console.log(error)
+    // console.log(electionDetails);
 
     if (!id) return <p>Loading...</p>;
 
@@ -201,11 +308,20 @@ export default function Overview() {
                                                     />
                                                     <button 
                                                         className="flex items-center gap-1 px-[0.4rem] shodow-md active:scale-95 active:shadow-inner transition bg-[#f0f0f0] border border-[#ced4da]"
-                                                        onClick={() => navigator.clipboard.writeText(electionUrl)}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            // navigator.clipboard.writeText(electionUrl);
+                                                            // setCopied(true);
+                                                            navigator.clipboard.writeText(electionUrl).then(() => {
+                                                                setCopied(true);
+                                                                setTimeout(() => setCopied(false), 2000); // Reset message after 2 seconds
+                                                            });
+                                                        }}
                                                         disabled={!isUrlActive}
                                                     >
                                                         <FaRegCopy />
-                                                        Copy
+                                                        {copied ? 'Copied' : 'Copy'}
+                                                        
                                                     </button>
                                                 </div>
                                                 <div className="w-full flex mt-[0.5rem] whitespace-normal text-[#868e96] text-[0.7rem] items-center gap-1">
@@ -218,7 +334,7 @@ export default function Overview() {
                                                     <input type="text"  className="lg:w-[90%] text-[1rem] px-[0.4rem] py-[0.3rem] rounded-sm border border-[#ced4da] bg-[#f6f8fa] text-[#495057]" />
                                                     <button className="flex items-center gap-1 px-[0.4rem] shodow-md active:scale-95 active:shadow-inner transition bg-[#f0f0f0] border border-[#ced4da]">
                                                         <FaRegCopy />
-                                                        Copy
+                                                        Copy 
                                                     </button>
                                                 </div>
                                                 <div className="flex mt-[0.5rem] whitespace-normal text-[#868e96] text-[0.7rem] items-center gap-1">
@@ -243,22 +359,22 @@ export default function Overview() {
                                 <div className="rounded text-[#fff] bg-[#ff6900] p-[1rem] flex items-center justify-between">
                                     <FaUsers className="text-[4rem] opacity-[.6]" />
                                     <div className="flex flex-col items-end">
-                                        <h2 className="text-[2rem] font-bold">0</h2>
-                                        <span>Voters</span>
+                                        <h2 className="text-[2rem] font-bold">{totalVoters}</h2>
+                                        <span>Voter(s)</span>
                                     </div>
                                 </div>
                                 <div className="rounded mt-[1rem] text-[#fff] bg-[#ef0872] p-[1rem] flex items-center justify-between">
                                     <HiMiniQuestionMarkCircle className="text-[4rem] opacity-[.6]" />
                                     <div className="flex flex-col items-end">
-                                        <h2 className="text-[2rem] font-bold">0</h2>
-                                        <span>Ballot Questions</span>
+                                        <h2 className="text-[2rem] font-bold">{totalBallots}</h2>
+                                        <span>Ballot(s)</span>
                                     </div>
                                 </div>
                                 <div className="rounded mt-[1rem] text-[#fff] bg-[#502ac1] p-[1rem] flex items-center justify-between whitespace-nowrap">
                                     <IoIosOptions className="text-[4rem] opacity-[.6]" />
                                     <div className="flex flex-col items-end">
-                                        <p className="text-[2rem] font-bold">0</p>
-                                        <p>Options</p>
+                                        <p className="text-[2rem] font-bold">{totalCandidates}</p>
+                                        <p>Candidate(s)</p>
                                     </div>
                                 </div>
                             </div>

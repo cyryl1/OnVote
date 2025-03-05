@@ -13,9 +13,9 @@ def is_active(start_time, end_time):
     return start_date <= current_time <= end_date
 
 class Admin_service:
-    def __init__(self):
-        pass
-
+    def __init__(self, db):
+        self.db = db
+    
     DATE_FORMAT = "%Y-%m-%dT%H:%M"  # Define date format as a constant
 
     def create_election(self, email, title, start_date, end_date, description=None):
@@ -404,23 +404,30 @@ class Admin_service:
                     "status": "error",
                     "message": "Invalid ballot ID"
                 }
-            candidate = Candidate(
-                title=title, 
-                bio=description, 
-                # photo=photo,
-                ballot_id=ballot_id
-            )
-            try:
-                candidate.save()
+            existing_candidate = Candidate.query.filter_by(title=title, ballot_id=ballot_id).first()
+            if not existing_candidate:
+                candidate = Candidate(
+                    title=title, 
+                    bio=description, 
+                    # photo=photo,
+                    ballot_id=ballot_id
+                )
+                try:
+                    candidate.save()
 
+                    return {
+                        "status": "success",
+                        "message": "candidates added"
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            else:
                 return {
-                    "status": "success",
-                    "message": "candidates added"
-                }
-            except Exception as e:
-                return {
-                    "status": "exception",
-                    "message": str(e)
+                    "status": "error",
+                    "message": "Candidate already exists"
                 }
         else:
             return {
@@ -570,15 +577,38 @@ class Admin_service:
                 "message": "election not found"
             }
 
+    def get_total_candidates(self, election_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            try:
+                total_candidates = self.db.session.query(self.db.func.count(Candidate.id)).\
+                    join(Ballot, Ballot.id == Candidate.ballot_id).\
+                    filter(Ballot.election_id == election_id).scalar()
+                
+                return {
+                    "status": "success",
+                    "message": total_candidates
+                }
+            except Exception as e:
+                return {
+                    "status": "exception",
+                    "message": str(e)
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "election not found"
+            }
 
-    def get_vote_url(self, id, start_date, end_date):
-        election = Election.query.filter_by(id=id).first()
+
+    def get_vote_url(self, election_id, start_date, end_date):
+        election = Election.query.filter_by(id=election_id).first()
         if election:
             try:
                 if is_active(start_date, end_date):
                     return {
                         "status": "success",
-                        "message": f"http://localhost:5000/vote/{id}",
+                        "message": f"http://localhost:5173/election/{election_id}/vote_page",
                         "is_active": True
                     }
                 return {
@@ -601,26 +631,34 @@ class Admin_service:
     def add_voter(self, election_id, voter_name, voter_email, voter_key, voter_password, has_voted=None):
         election = Election.query.filter_by(id=election_id).first()
         if election:
-            voter = Voter(
-                election_id=election_id, 
-                voter_name=voter_name, 
-                voter_email=voter_email, 
-                voter_key=voter_key, 
-                has_voted=has_voted
-            )
-            voter.set_voter_password(voter_password)
+            existing_voter = Voter.query.filter_by(voter_email=voter_email).first()
+            if not existing_voter:
+                voter = Voter(
+                    election_id=election_id, 
+                    voter_name=voter_name, 
+                    voter_email=voter_email, 
+                    voter_key=voter_key,
+                    voter_password=voter_password,
+                    has_voted=has_voted
+                )
+                # voter.set_voter_password(voter_password)
 
-            try:
-                voter.save()
+                try:
+                    voter.save()
 
+                    return {
+                        "status": "success",
+                        "message": "voter added"
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            else:
                 return {
-                    "status": "success",
-                    "message": "voter added"
-                }
-            except Exception as e:
-                return {
-                    "status": "exception",
-                    "message": str(e)
+                    "status": "error",
+                    "message": "Voter already exists"
                 }
         else:
             return {
@@ -632,7 +670,7 @@ class Admin_service:
         election = Election.query.filter_by(id=election_id).first()
         if election:
             try:
-                voters = Voter.query.filter_by(id=election_id).all()
+                voters = Voter.query.filter_by(election_id=election_id).all()
                 if not voters:
                     return {
                         "status": "success",
@@ -661,35 +699,89 @@ class Admin_service:
                 "message": "Election not found"
             }
     
-    # def update_voter(self, election_id, voter_id, voter_email):
-    #     election = Election.query.filter_by(id=election_id).first()
-    #     if election:
-    #         voter = Voter.query.filter_by(id=voter_id).first()
-    #         if voter:
-    #             voter.voter_email = voter_email
+    def update_voter(self, election_id, voter_id, voter_name, voter_email):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            voter = Voter.query.filter_by(id=voter_id).first()
+            if voter:
+                voter.voter_email = voter_email
+                voter.voter_name = voter_name
 
-    #             try:
-    #                 voter.save()
+                try:
+                    voter.save()
 
-    #                 return {
-    #                     "status": "success",
-    #                     "message": "voter's credentials updated"
-    #                 }
-    #             except Exception as e:
-    #                 return {
-    #                     "status": "exception",
-    #                     "message": str(e)
-    #                 }
-    #         else:
-    #             return {
-    #                 "status": "error",
-    #                 "message": " Voter not found"
-    #             }
-    #     else:
-    #         return {
-    #             "status": "error",
-    #             "message": "election not found"
-    #         }
+                    return {
+                        "status": "success",
+                        "message": "voter's credentials updated"
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            else:
+                return {
+                    "status": "error",
+                    "message": " Voter not found"
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "election not found"
+            }
+
+    def delete_voters(self, election_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            voters = Voter.query.filter_by(election_id=election_id).all()
+
+            for voter in voters:
+                try:
+                    voter.delete()
+
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            return {
+                "status": "success",
+                "message": "Voters cleared successfully"
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "Election not found"
+            }
+        
+    def delete_voter(self, election_id, voter_id):
+        election = Election.query.filter_by(id=election_id)
+        if election:
+            voter = Voter.query.filter_by(id=voter_id).first()
+
+            if voter:
+                try:
+                    voter.delete()
+
+                    return {
+                        "status": "success",
+                        "message": "Voter deleted successfully"
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exception",
+                        "message": str(e)
+                    }
+            else:
+                return {
+                    "status": "error",
+                    "message": "voter not found"
+                }
+        else:
+            return {
+                "status": "error",
+                "message": "election not found"
+            }
 
 
         
@@ -709,3 +801,4 @@ class Admin_service:
                 "status": "success",
                 "message": str(e)
             }
+        
