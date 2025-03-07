@@ -26,6 +26,7 @@ export default function CreateElection() {
     try {
       const accessToken = localStorage.getItem('accessToken');
       console.log(accessToken);
+      console.log(form);
       const response = await axios.post('http://127.0.0.1:5000/onvote/election/create', JSON.stringify(form), {
         headers: { 
           'Authorization': `Bearer ${accessToken}`, 

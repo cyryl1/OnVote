@@ -1,6 +1,7 @@
-import { useState } from "react";
+// import { useState } from "react";
 import Modal from "react-modal";
 import { PiWarningCircleThin } from "react-icons/pi";
+import PropTypes from "prop-types";
 
 Modal.setAppElement("#root");
 
@@ -33,4 +34,10 @@ export default function BallotDeleteModal({ isOpen, onRequestClose, onDelete }) 
         </div>
     </Modal>
   )
+}
+
+BallotDeleteModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onRequestClose: PropTypes.func.isRequired,
+    onDelete: PropTypes.func.isRequired,
 }

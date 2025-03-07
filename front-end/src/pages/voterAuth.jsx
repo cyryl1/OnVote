@@ -1,16 +1,40 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from "axios";
+import LoadingModal from '../components/loadingModal';
 
 export default function VoterAuth() {
     const navigate = useNavigate();
     const { id } = useParams();
     const [errors, setErrors] = useState({});
+    const [electionName, setElectionName] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         voter_key: "",
         voter_password: "",
     });
+
+    useEffect(() => {
+        const fetchElection = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axios.get(`http://127.0.0.1:5000/onvote/get_election/${id}`);
+                if (response.status === 200 && response.data.message) {
+                    setElectionName(response.data.message.title)
+                } else {
+                    alert("Error fetching election data");
+                }
+            } catch (err) {
+                console.error(`Failed to load: ${err.message || err}`);
+            } finally {
+                setIsLoading(false);
+            }
+            
+        };
+
+        fetchElection();
+    }, [id]);
 
 
     const handleChange = (e) => {
@@ -21,6 +45,7 @@ export default function VoterAuth() {
     const handleLogin = async (form) => {
         console.log(form);
         console.log(id)
+        setIsLoading(true);
         try {
             const formEncoded = new URLSearchParams();
             for (const key in form) {
@@ -36,23 +61,27 @@ export default function VoterAuth() {
             }
         );
 
-            if (response.status === 200 && response.data.message) {
+            if (response.status === 201 && response.data.message) {
                 localStorage.setItem(`voter_auth_${id}`, "true");
+                localStorage.setItem(`voter_id_${id}`, response.data.id);
                 setTimeout(() => {
                     navigate(`/election/${id}/vote_page`);
                 }, 1000);
             }
-
-            if (response.status === 400) {
-                alert(response.data.message);
-            }
-
-            if (response.status === 404) {
-                alert(response.data.message);
-            }
         } catch (error) {
-            console.error(error);
-        } 
+            if(error.response.status === 400) {
+                alert(error.response.data.message);
+                navigate(0);
+            } else if (error.response.status === 404) {
+                alert(error.response.data.message);
+                navigate(0);
+            } else {
+                console.error(error);
+            }
+            
+        } finally {
+            setIsLoading(false);
+        }
     }
     
     const handleSubmit = (e) => {
@@ -86,38 +115,56 @@ export default function VoterAuth() {
 
   return (
     <>
-    <div>
-      <h2>Voter Authentication</h2>
-      <form onSubmit={handleLogin}>
-        <div className="form-group flex flex-col">
-            {errors && <p style={{ color: "red" }}>{errors.voter_key}</p>}
-            <label htmlFor="voter_key" className='font-semibold lg:font-bold text-gray-700'>Voter Key</label>
-            <input
-                type="text"
-                name="voter_key"
-                placeholder="Voter Key"
-                value={formData.voter_key}
-                onChange={handleChange}
-                className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                required
-            />
-        </div>
+        <div className="m-auto p-[1.5rem]">
+            <div className="text-center">
+                <h3 className="font-bold text-[2rem]">{electionName}</h3>
+                <p className="mt-2 text-red-500">Please provide your voter key and password to proceed.</p>
+            </div>
+            <form onSubmit={handleLogin} className="border shadow-md mt-[4rem] rounded">
+                <div className="font-semibold p-[.8rem] text-[1.2rem] bg-[#0bacfa] text-white rounded-t">Login to vote</div>
+                <div className="form-group flex flex-col p-[.8rem]">
+                    {errors && <p style={{ color: "red" }}>{errors.voter_key}</p>}
+                    <label htmlFor="voter_key" className='font-semibold lg:font-bold text-gray-700'>Voter Key</label>
+                    <input
+                        type="text"
+                        name="voter_key"
+                        placeholder="Voter Key"
+                        value={formData.voter_key}
+                        onChange={handleChange}
+                        className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        required
+                    />
+                </div>
 
-        <div className="form-group flex flex-col">
-            {errors && <p style={{ color: "red" }}>{errors.voter_password}</p>}
-            <label htmlFor="voter_password" className='font-semibold lg:font-bold text-gray-700'>voter_password</label>
-            <input
-            type="password"
-            name="voter_password"
-            placeholder="Password"
-            value={formData.voter_password}
-            onChange={handleChange}
-            className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
-            required
-            />
+                <div className="form-group flex flex-col p-[.8rem]">
+                    {errors && <p style={{ color: "red" }}>{errors.voter_password}</p>}
+                    <label htmlFor="voter_password" className='font-semibold lg:font-bold text-gray-700'>Voter Password</label>
+                    <input
+                    type="password"
+                    name="voter_password"
+                    placeholder="Password"
+                    value={formData.voter_password}
+                    onChange={handleChange}
+                    className='border border-[#ced4da] h-10 rounded bg-[#f6f8fa] px-3 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    required
+                    />
+                </div>
+                <div className="flex justify-center items-center p-[1rem]">
+                    <button 
+                        type="submit" 
+                        onClick={handleSubmit}
+                        className="bg-green-500 border border-green-500 text-[#fff] font-aemibold rounded h-10 w-[90%] hover:bg-blue-700 transition "
+                    >
+                        Authenticate
+                    </button>
+                </div>
+            
+            </form>
         </div>
-        <button type="submit" onClick={handleSubmit}>Authenticate</button>
-      </form>
-    </div></>
+        <LoadingModal 
+            isOpen={isLoading}
+            onRequestClose={() => setIsLoading(!isLoading)}
+        />
+    </>
   )
 }

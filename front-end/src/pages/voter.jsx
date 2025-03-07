@@ -113,7 +113,7 @@ export default function Voter({ form, addVoter, onEditVoter }) {
                   <tbody className="border">
                     {filteredVoters.length > 0 ? (
                       filteredVoters.map((item, index) => (
-                        <tr key={index} className="text-[.9rem] cursor-pointer" onClick={() => onEditVoter(item)}>
+                        <tr key={index} className="text-[.9rem] cursor-pointer hover:bg-yellow-100 transition-colors duration-300" onClick={() => onEditVoter(item)}>
                           <td className="px-4 py-2">{item.voter_name}</td>
                           <td className="px-4 py-2">{item.voter_key}</td>
                           <td className="px-4 py-2">{item.voter_email}</td>

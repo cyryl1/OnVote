@@ -1,6 +1,6 @@
 // import React from 'react'
 // import Logo from '../assets/onvote-high-resolution-logo.svg';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import LoadingModal from '../components/loadingModal';
 import Logo from '../components/logo';
@@ -13,6 +13,7 @@ export default function TokenRefresh() {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const [password, setpassword] = useState('');
+    const location = useLocation();
 
     // const [error, setError] = useState('');
 
@@ -21,22 +22,26 @@ export default function TokenRefresh() {
         setpassword(e.target.value);
     };
 
-    const handleLogin = async () => {
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        const refreshToken = localStorage.getItem('refreshToken');
         try {
-            setIsLoading(true);
-            const refreshToken = localStorage.getItem('refreshToken');
+            console.log(refreshToken);
 
-            const response = await axios.post('http://127.0.0.1:5000/onvote/refresh', {
-                password: password,
-            }, { 
-                headers: { 'Authorization': `Bearer ${refreshToken}` 
-            }});
-            if (response.status === 201 && response.data.message) {
+            const response = await axios.post('http://127.0.0.1:5000/onvote/refresh', 
+                { password }, 
+                { headers: { 'Authorization': `Bearer ${refreshToken}` }}
+            );
+            if (response.status === 200 && response.data.message) {
                 setMessage(response.data.message)
+                alert(response.data.message);
                 localStorage.setItem('accessToken', response.data.token)
                 // alert(result.message);
+                const redirectPath = location.state?.from?.pathname || '/dashboard';
+                // const redirectPath = '/dashboard';
                 setTimeout(() => {
-                    navigate(-1);
+                    navigate(redirectPath, { replace: true });
                 }, 1000);
             
             }
@@ -50,31 +55,6 @@ export default function TokenRefresh() {
         }
     }
     
-    // const handleSubmit = (e) => {
-    //     e.preventDefault();
-    //     const newError = validateForm(password);
-    //     setError(newError);
-
-    //     if (newError.length === 0) {
-    //         console.log("Form submitted successfully");
-    //         setIsLoading(true);
-    //         handleLogin(password);
-    //         console.log(password);
-    //     } else {
-    //         console.log("Form submission failed");
-    //     }
-    // };
-
-    // const validateForm = (data) => {
-
-    //     if (!data.password) {
-    //         const error = 'Password is required';
-
-    //         return error;
-    //     }
-
-        
-    // }
 
 
     return (
@@ -86,7 +66,10 @@ export default function TokenRefresh() {
                     color='black'
                 />
             </div>
-            <div className='mt-[2rem] font-bold text-[1.5rem] px-[1rem] text-center text-red-500'>Token has expired enter password to continue</div>
+            <div className="mb-6 text-center">
+                <h2 className="text-2xl font-bold text-red-500">Session Expired</h2>
+                <p className="text-lg">Please re-enter your password to refresh your session.</p>
+            </div>
             <div className="card-body border-[#ced4da]-50 border-[1px] w-[90%] md:w-[40%] lg:w-[30%] m-auto rounded bg-white shadow-md">
                 <form className="p-6 flex flex-col gap-3 lg:gap-[1rem]">
                     <div className="form-group flex flex-col gap-1">
@@ -98,10 +81,11 @@ export default function TokenRefresh() {
                     </div>
                     <button 
                         type="submit" 
+                        disabled={isLoading}
                         className="bg-blue-600 border border-blue-600 text-[#fff] font-aemibold rounded h-10 hover:bg-blue-700 transition"
-                        onClick={handleLogin}
+                        onClick={handleSubmit}
                     >
-                        Continue
+                        {isLoading ? 'Refreshing...' : 'Refresh Session'}
                     </button>
                 </form>
             </div>

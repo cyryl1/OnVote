@@ -50,14 +50,14 @@ class AuthService:
                 "message": "Logged in successfully",
                 "tokens": {
                     "access": create_access_token(identity=admin.email, additional_claims={"role": "admin"}),
-                    "reset": create_refresh_token(identity=admin.email)
+                    "refresh": create_refresh_token(identity=admin.email)
                 },
                 "name": admin.name
             }
         else:
             return {"status": "error", "message": "Invalid email or password"}
         
-    def refresh(current_user, password):
+    def refresh(self, current_user, password):
         try:
             admin = Admin.query.filter_by(email=current_user).first()
             if admin.check_password(password):

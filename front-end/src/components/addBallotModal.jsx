@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Modal from "react-modal";
 import ToggleSwitch from "./toggleSwitch";
-import { RiDeleteBinFill } from "react-icons/ri";
+// import { RiDeleteBinFill } from "react-icons/ri";
 import BallotDeleteModal from "./ballotDeleteModal";
 import PropTypes from "prop-types";
 // import axios from 'axios';
@@ -89,13 +89,13 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave, initial
     }
 
 
-    const handleDeleteModal = (e) => {
-        e.preventDefault();
-        // e.stopPropagation();
-        setIsDeleteModalOpen(true);
-        // handleDelete
-        // Delete
-    }
+    // const handleDeleteModal = (e) => {
+    //     e.preventDefault();
+    //     // e.stopPropagation();
+    //     setIsDeleteModalOpen(true);
+    //     // handleDelete
+    //     // Delete
+    // }
 
     const handleBallotDelete = () => {
         // Handle delete
@@ -153,10 +153,10 @@ export default function AddBallotModal({ isOpen, onRequestClose, onSave, initial
 
                         <div className="form-group mt-[2rem] flex justify-between">
                             <button type="submit" onClick={handleBallotSave} className="bg-[#2ecd10] text-white px-[1rem] py-[.5rem] rounded">Save</button>
-                            <button type="submit" onClick={handleDeleteModal} className="bg-[#ff0000] text-white flex items-center gap-2 py-[.5rem] px-[1rem] rounded">
+                            {/* <button type="submit" onClick={handleDeleteModal} className="bg-[#ff0000] text-white flex items-center gap-2 py-[.5rem] px-[1rem] rounded">
                                 <RiDeleteBinFill />
                                 Delete
-                            </button>
+                            </button> */}
                         </div>
                     </form>
                 </div>

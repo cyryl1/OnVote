@@ -71,7 +71,7 @@ export default function Voters() {
     const handleVoterSave = async (form) => {
         try {
             setIsLoading(true);
-            const accessToken = localStorage.getItem('accessTooken');
+            const accessToken = localStorage.getItem('accessToken');
             let response;
             console.log(form);
             console.log(voterToEdit)

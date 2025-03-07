@@ -6,6 +6,7 @@ import { CgDanger } from "react-icons/cg";
 import { BsFillLightningChargeFill, BsLightningCharge } from "react-icons/bs";
 import PropTypes from "prop-types";
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 Modal.setAppElement("#root"); //set app for accessibility
 
@@ -13,6 +14,7 @@ Modal.setAppElement("#root"); //set app for accessibility
 export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialData, isEditMode }) {
     const [error, setError] = useState({});
     const [isvoterCredetials, setIsVoterCredentials] = useState(false);
+    const navigate = useNavigate();
 
     const initialState = {
         voter_name: '',
@@ -71,15 +73,23 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialD
 
     const handleDeleteVoter = async () => {
         try {
-            const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${initialData.election_id}/delete_voter/${initialData.voter_id}`)
+            const accessToken = localStorage.getItem('accessToken');
+            const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${initialData.election_id}/delete_voter/${initialData.voter_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
 
             if (response.status === 200 && response.data.message) {
                 alert(response.data.message);
                 onRequestClose();
             }
         } catch(err) {
-            // setError(`Error fetching voters: ${err.message || err}`)
-            console.error(`Failed to load: ${err.message || err}`);
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
         }
     }
 
@@ -103,8 +113,11 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialD
                 console.log(response.data.message);
             }
         } catch (err) {
-            console.error(`Error fetching voter credentials: ${err.message || err}`);
-            // setError(`Error fetching voters: ${err.message || err}`);
+            if (err.response.status === 401 && err.response.data.status === "token_expired") {
+                navigate('/token_refresh');
+            } else {
+                console.error(`Failed to load: ${err.message || err}`);
+            }
         }
     }
 
@@ -168,7 +181,7 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialD
                         <div className="flex whitespace-normal justify-between">
                             <div className="form-group flex flex-col gap-1 mt-[1rem] w-[40%]">
                                 <div className={`flex items-center gap-1 ${error.voter_key ? 'text-red-500' : ''}`}>
-                                    <label htmlFor="voter_key" className={`text-[1rem] font-bold`}>Voter ID</label>
+                                    <label htmlFor="voter_key" className={`text-[.8rem] font-bold`}>Voter ID</label>
                                     {!error.voter_key && (<HiQuestionMarkCircle />)}
                                     {error.voter_key && (<CgDanger />)}
                                 </div>
@@ -188,7 +201,7 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialD
                             </div>
                             <div className="form-group flex flex-col gap-1 mt-[1rem] w-[40%]">
                                 <div className={`flex items-center gap-1 ${error.voter_password ? 'text-red-500' : 'text-[#000]'}`}>
-                                    <label htmlFor="voter_password" className={`text-[1rem] font-bold`}>Voter Key</label>
+                                    <label htmlFor="voter_password" className={`text-[.8rem] font-bold`}>Voter Key</label>
                                     {!error.voter_password && (<HiQuestionMarkCircle />)}
                                     {error.voter_password && (<CgDanger />)}
                                 </div>

@@ -18,10 +18,9 @@ def validate_voter(election_id):
     if voter['status'] == 'error':
         return jsonify(voter), 404
     else:
-        return jsonify(voter), 200
+        return jsonify(voter), 201
 
 @vote_bp.post('/election/<int:election_id>/cast_vote')
-# @jwt_required()
 def cast_vote(election_id):   
     data = request.get_json()
     voter_id = data.get('voter_id')
@@ -52,4 +51,25 @@ def get_election_candidate_votes(election_id):
     if candidate_votes['status'] == 'error':
         return jsonify(candidate_votes), 404
     return jsonify(candidate_votes), 200
+
+@vote_bp.get('/election/<election_id>/vote/get_ballots')
+def get_ballots(election_id):
+    ballots = vote_service.get_all_ballots(election_id)
+    if ballots['status'] == 'error':
+        return jsonify(ballots), 404
+    elif ballots['status'] == 'exeption':
+        return jsonify(ballots), 500
+    else:
+        return jsonify(ballots), 200
+
+@vote_bp.get('/election/<election_id>/ballot/<ballot_id>/vote/get_candidates')
+def get_candidates(election_id, ballot_id):
+    candidates = vote_service.get_candidates(election_id, ballot_id)
+
+    if candidates['status'] == 'error':
+        return jsonify(candidates), 404
+    elif candidates['status'] == 'exception':
+        return jsonify(candidates), 500
+    else:
+        return jsonify(candidates), 200
   

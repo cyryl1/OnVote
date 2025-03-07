@@ -30,7 +30,8 @@ class Vote_service:
             if voter and check_password:
                 return {
                     "status": "success",
-                    "message": "voter authenticated"
+                    "message": "voter authenticated",
+                    "id": voter.id
                 }
             else:
                 return {
@@ -87,11 +88,14 @@ class Vote_service:
 
         try:
             new_vote.save()
+            voter.has_voted = True
+            self.db.session.commit()
             return {
                 "status": "success",
                 "message": "vote cast"
             }
         except Exception as e:
+            self.db.session.rollback()
             return {
                 "status": "exception",
                 "message": str(e)
@@ -169,4 +173,77 @@ class Vote_service:
             'status': 'success',
             'ballots': list(organized_results.values())
         }
+
+    def get_all_ballots(self, election_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            try:
+                ballots = Ballot.query.filter_by(election_id=election_id).all()
+                if not ballots:
+                    return {
+                        "status": "success",
+                        "message": [], # Return empty list instead of error when no ballots exist
+                        "election_title": election.title
+                    }
+                
+                result = []
+                for ballot in ballots:
+                    ballot_dict = ballot.to_dict()
+                    result.append(ballot_dict)
+
+                return {
+                    "status": "success",
+                    # "message": [ballot.to_dict() for election in ballots]
+                    "message": result,
+                    "election_title": election.title
+                }
+
+            except Exception as e:
+                return {
+                    "status": "exception",
+                    "message": f"Error retrieving ballots: {str(e)}"
+                }
+        else: 
+            return {
+                "status": "error",
+                "message": "election not found"
+            }
+        
+    def get_candidates(self, election_id, ballot_id):
+        election = Election.query.filter_by(id=election_id).first()
+        if election:
+            ballot = Ballot.query.filter_by(id=ballot_id).first()
+            if ballot:
+                try:
+                    candidates = Candidate.query.filter_by(ballot_id=ballot_id).all()
+                    if not candidates:
+                        return {
+                            "status": "success",
+                            "message": []
+                        }
+                    
+                    result = []
+                    for candidate in candidates:
+                        candidate_dict = candidate.to_dict()
+                        result.append(candidate_dict)
+                    
+                    return {
+                        "status": "success",
+                        "message": result
+                    }
+                except Exception as e:
+                    return {
+                        "status": "exeption",
+                        "message": str(e)
+                    }
+            else:
+                return {
+                    "status": "error",
+                    "message": "ballot not found"
+                }
+        else: 
+            return {
+                "status": "error",
+                "message": "election not found"
+            }
         

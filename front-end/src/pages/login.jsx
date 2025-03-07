@@ -44,8 +44,9 @@ export default function Login() {
                 // alert(result.message);
                 saveTokens({
                     accessToken: result.tokens.access,
-                    resetToken: result.tokens.reset
+                    resetToken: result.tokens.refresh
                 });
+                console.log(result.tokens.refresh);
                 localStorage.setItem('admin_name', result.name);
                 setTimeout(() => {
                     navigate('/dashboard');

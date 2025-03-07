@@ -11,7 +11,7 @@ export const TokenProvider = ({ children }) => {
 
     const saveTokens = (newTokens) => {
         localStorage.setItem("accessToken", newTokens.accessToken);
-        localStorage.setItem("resetToken", newTokens.resetToken);
+        localStorage.setItem("refreshToken", newTokens.resetToken);
 
         setTokens(newTokens);
     }

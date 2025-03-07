@@ -51,7 +51,7 @@ def refresh_user():
         return jsonify(refresh), 500
     elif refresh['status'] == 'error':
         return jsonify(refresh), 400
-    return jsonify(refresh), 201
+    return jsonify(refresh), 200
 
 @auth_bp.delete('/auth/delete')
 @jwt_required()

@@ -19,10 +19,12 @@ class Admin_service:
     DATE_FORMAT = "%Y-%m-%dT%H:%M"  # Define date format as a constant
 
     def create_election(self, email, title, start_date, end_date, description=None):
+        print(start_date)
+        print(end_date)
         if not all([title, start_date, end_date]):
             return {
                 "status": "error",
-                "message": "title, start_date, ande end_date are required"
+                "message": "title, start_date, and end_date are required"
             }
         
         admin = Admin.query.filter_by(email=email).first()
@@ -48,8 +50,8 @@ class Admin_service:
                 "status": "error",
                 "message": f"Invalid date format. Expected format: {self.DATE_FORMAT}"
             }
-        print(start)
-        print(end)
+        # print(start)
+        # print(end)
         time_diff = abs(end - start)
 
         if end <= start:
