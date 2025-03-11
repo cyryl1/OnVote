@@ -345,6 +345,27 @@ def delete_voter(election_id, voter_id):
         return jsonify(voter), 200
     
 
+@admin_bp.get('/election/<int:election_id>/total_votes')
+@jwt_required()
+@admin_required
+def get_election_total_votes(election_id):
+    total_votes = admin_service.get_election_total_votes(election_id)
+
+    if total_votes['status'] == 'error':
+        return jsonify(total_votes), 404
+    return jsonify(total_votes), 200
+
+@admin_bp.get('/election/<int:election_id>/candidate_votes')
+@jwt_required()
+@admin_required
+def get_election_candidate_votes(election_id):
+    candidate_votes = admin_service.get_election_candidate_votes(election_id)
+
+    if candidate_votes['status'] == 'error':
+        return jsonify(candidate_votes), 404
+    return jsonify(candidate_votes), 200
+    
+
     
 @admin_bp.get('/get_voters_credentials')
 def generate_voter_credential():

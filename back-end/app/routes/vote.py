@@ -36,21 +36,7 @@ def cast_vote(election_id):
     else:
         return jsonify(vote), 200
 
-@vote_bp.get('/election/<int:election_id>/total_votes')
-def get_election_total_votes(election_id):
-    total_votes = vote_service.get_election_total_votes(election_id)
 
-    if total_votes['status'] == 'error':
-        return jsonify(total_votes), 404
-    return jsonify(total_votes), 200
-
-@vote_bp.get('/election/<int:election_id>/candidate_votes')
-def get_election_candidate_votes(election_id):
-    candidate_votes = vote_service.get_election_candidate_votes(election_id)
-
-    if candidate_votes['status'] == 'error':
-        return jsonify(candidate_votes), 404
-    return jsonify(candidate_votes), 200
 
 @vote_bp.get('/election/<election_id>/vote/get_ballots')
 def get_ballots(election_id):
@@ -72,4 +58,12 @@ def get_candidates(election_id, ballot_id):
         return jsonify(candidates), 500
     else:
         return jsonify(candidates), 200
+
+@vote_bp.get('/election/<int:election_id>/candidate_votes/result')
+def get_election_candidate_votes(election_id):
+    candidate_votes = vote_service.get_election_candidate_votes(election_id)
+
+    if candidate_votes['status'] == 'error':
+        return jsonify(candidate_votes), 404
+    return jsonify(candidate_votes), 200
   
