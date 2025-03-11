@@ -131,7 +131,8 @@ export default function VotePage() {
         }
       }
       alert("Votes successfully cast!");
-      navigate(`/election/${id}/lastPage`)
+      localStorage.setItem(`voter_voted_${id}`, "true");
+      navigate(`/election/${id}/lastPage`);
     } catch (error) {
       console.error("Error casting vote:", error);
       alert("There was an error casting your vote.");
@@ -147,7 +148,7 @@ export default function VotePage() {
         <div className="text-center text-[2rem] font-bold">{electionName}</div>
         {ballots && ballots.map((item, index) => (
           <div key={index}>
-            <form className="border shadow-md mt-[3rem] rounded">
+            <form className="border shadow-md mt-[3rem] m-auto rounded lg:w-[50%]">
               <div className="font-semibold p-[.8rem] text-[1.2rem] bg-[#0bacfa] text-white rounded-t">{item.title}</div>
               <div className="head p-[.8rem]">
                 <p className="text-[.8rem] font-bold">INSTRUCTIONS</p>
@@ -181,7 +182,7 @@ export default function VotePage() {
           </div>
         ))}
         <button 
-          className="mt-5 border border-green-500 px-3 py-1 font-bold text-white bg-green-500 rounded"
+          className="mt-5 border border-green-500 px-3 py-1 font-bold text-white bg-green-500 m-auto rounded lg:w-[50%]"
           onClick={handleSubmit}
         >
           Submit

@@ -35,9 +35,14 @@ export default function Voter({ form, addVoter, onEditVoter }) {
   }
 
   const handleDeleteAllVoters = async () => {
+    const accessToken = localStorage.getItem('accessToken');
     try {
       setIsLoading(true);
-        const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${filteredVoters[0].election_id}/delete_voters`)
+        const response = await axios.delete(`http://127.0.0.1:5000/onvote/election/${filteredVoters[0].election_id}/delete_voters`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
 
         if (response.status === 200 && response.data.message) {
             alert(response.data.message);

@@ -206,50 +206,63 @@ export default function PreviewPage() {
               Preview
             </div>
 
-            <div className="m-auto p-[1.5rem]" >
-                <div className="text-center text-[2rem] font-bold">{electionName}</div>
-                {ballots && ballots.map((item, index) => (
-                <div key={index}>
-                    <form className="border shadow-md mt-[3rem] rounded">
-                    <div className="font-semibold p-[.8rem] text-[1.2rem] bg-[#0bacfa] text-white rounded-t">{item.title}</div>
-                    <div className="head p-[.8rem]">
-                        <p className="text-[.8rem] font-bold">INSTRUCTIONS</p>
-                        <div className="border rounded p-[.8rem]">
-                        Select <span className="border px-[.4rem] py-.5 rounded bg-[#0bacfa] text-white font-bold">1</span> option from the list below
-                        <p className="text-red-600 text-[.8rem]">* Required</p>
+            {preview ? (
+                <div className="page-body m-auto p-[1.5rem]" >
+                    <div className="text-center text-[2rem] font-bold">{electionName}</div>
+                    {ballots && ballots.map((item, index) => (
+                    <div key={index}>
+                        <form className="border shadow-md mt-[3rem] m-auto rounded lg:w-[50%]">
+                        <div className="font-semibold p-[.8rem] text-[1.2rem] bg-[#0bacfa] text-white rounded-t">{item.title}</div>
+                        <div className="head p-[.8rem]">
+                            <p className="text-[.8rem] font-bold">INSTRUCTIONS</p>
+                            <div className="border rounded p-[.8rem]">
+                            Select <span className="border px-[.4rem] py-.5 rounded bg-[#0bacfa] text-white font-bold">1</span> option from the list below
+                            <p className="text-red-600 text-[.8rem]">* Required</p>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        {candidates[item.id]?.map((candidate, idx) => (
-                        <div key={idx} className="form-group flex item-center p-[1rem] gap-3">
-                            <input 
-                            type="radio" 
-                            className="w-6" 
-                            name={`ballot-${item.id}`}
-                            value={candidate.id}
-                            checked={selectedCandidates[item.id] === candidate.id}
-                            onChange={() => 
-                                setSelectedCandidates(prev => ({
-                                ...prev,
-                                [item.id]: candidate.id
-                                }))
-                            }
-                            />
-                            <div>{candidate.title}</div>
+                        <div>
+                            {candidates[item.id]?.map((candidate, idx) => (
+                            <div key={idx} className="form-group flex item-center p-[1rem] gap-3">
+                                <input 
+                                type="radio" 
+                                className="w-6" 
+                                name={`ballot-${item.id}`}
+                                value={candidate.id}
+                                checked={selectedCandidates[item.id] === candidate.id}
+                                onChange={() => 
+                                    setSelectedCandidates(prev => ({
+                                    ...prev,
+                                    [item.id]: candidate.id
+                                    }))
+                                }
+                                />
+                                <div>{candidate.title}</div>
+                            </div>
+                            ))}
+                            
                         </div>
-                        ))}
-                        
+                        </form>
                     </div>
-                    </form>
+                    ))}
+                    <div className="flex items-center gap-4 lg:w-[50%] m-auto">
+                        <button 
+                        className="mt-5 border border-green-500 px-3 py-1 font-bold text-white bg-green-500 rounded"
+                        onClick={handleSubmit}
+                        >
+                        Submit
+                        </button>
+                        <button 
+                            className="mt-5 border-2 border-grey-600 px-3 py-1 font-bold rounded"
+                            onClick={() => setPreview(false)}
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
-                ))}
-                <button 
-                className="mt-5 border border-green-500 px-3 py-1 font-bold text-white bg-green-500 rounded"
-                onClick={handleSubmit}
-                >
-                Submit
-                </button>
-            </div>
+            ) : (
+                <div onClick={() => setPreview(true)} className="mt-5 m-auto border w-[60%] text-center p-[1.rem] border-blue-400  rounded bg-blue-400 text-white font-bold nowrap">Click to Preview</div>
+            )}
+            
           </div>
         </div>
         

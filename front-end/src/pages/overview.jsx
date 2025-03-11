@@ -245,7 +245,7 @@ export default function Overview() {
                         id={id}
                     />
                 </div>
-                <div className={`whitespace-nowrap flex flex-col duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem]`}>
+                <div className={`whitespace-nowrap flex flex-col duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem] w-auto`}>
                     <div className={`flex-grow sticky top-0 bg-[#fff] flex whitespace-nowrap w-[100%] gap-[0.2rem] items-center border border-l-0 border-r-0 border-t-0`}>
                         <div className={`flex lg:hidden justify-center items-center w-[5%] px-[1.5rem] py-[1rem] border border-l-0 border-t-0 border-b-0 ${isActive ? 'bg-[#f2f2f2]' : 'bg-[#f6f8fa]'}`}>
                             <button 

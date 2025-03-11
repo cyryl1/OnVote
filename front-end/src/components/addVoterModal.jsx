@@ -163,7 +163,7 @@ export default function AddVoterModal({ isOpen, onRequestClose, onSave, initialD
             <div className="bg-[#fff] w-[80%] m-auto z-99">
                 <div className="flex justify-between px-[2rem] py-[1rem] bg-[#0bacfa]">
                     <div className="text-[1.5rem] text-[#fff] font-semibold">Add Voter</div>
-                    <div className="text-[1rem] text-[#fff] font-bold" onClick={onRequestClose}>X</div>
+                    <div className="text-[1rem] text-[#fff] font-bold cursor-pointer" onClick={onRequestClose}>X</div>
                 </div>
                 <div className="px-[1rem] py-[1rem]">
                     <form action="">

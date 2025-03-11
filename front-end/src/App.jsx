@@ -16,6 +16,7 @@ import LastPage from './pages/lastPage.jsx';
 import ProfileSettings from './pages/profileSettings.jsx';
 import TokenRefresh from './pages/tokenRefresh.jsx';
 import PreviewPage from './pages/previewPage.jsx';
+import ResultPage from './pages/resultPage.jsx';
 import AdminProtectedRoute from './protected_route/adminProtectedRoute.jsx';
 import VoterProtectedRoute from './protected_route/voterProtectedRoute.jsx';
 
@@ -99,6 +100,14 @@ function App() {
           element={
             <AdminProtectedRoute>
               <PreviewPage />
+            </AdminProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/election/:id/result" 
+          element={
+            <AdminProtectedRoute>
+              <ResultPage />
             </AdminProtectedRoute>
           } 
         />

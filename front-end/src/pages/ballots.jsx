@@ -123,7 +123,7 @@ export default function Ballots() {
 
   return (
     <>
-    <div className="relative">
+    <div className="relative mb-6">
         <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}>
           <Sidebar
             id={id}

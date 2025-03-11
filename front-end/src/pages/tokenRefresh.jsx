@@ -71,7 +71,7 @@ export default function TokenRefresh() {
                 <p className="text-lg">Please re-enter your password to refresh your session.</p>
             </div>
             <div className="card-body border-[#ced4da]-50 border-[1px] w-[90%] md:w-[40%] lg:w-[30%] m-auto rounded bg-white shadow-md">
-                <form className="p-6 flex flex-col gap-3 lg:gap-[1rem]">
+                <form className="p-6 flex flex-col gap-3 lg:gap-[1rem] lg:w-[50%] md:w-[50%]">
                     <div className="form-group flex flex-col gap-1">
                         {/* {error.password && (
                             <p className='text-red-500 text-[0.6rem]'>{error.password}</p>

@@ -1,29 +1,36 @@
 // import React from 'react'
-// import Logo from '../assets/onvote-high-resolution-logo.svg';
-import { useNavigate } from 'react-router-dom';
-// import { useState, useContext } from 'react';
-// import { TokenContext } from '../context/AuthContext';
+import { GiHamburgerMenu } from "react-icons/gi";
+import Sidebar from "../components/sidebar";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from 'react'
 import LoadingModal from '../components/loadingModal';
-
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "react-router-dom";
 import axios from 'axios';
+import { FaDiceD20 } from "react-icons/fa";
 
-export default function LastPage() {
+
+export default function ResultPage() {
+
     const { id } = useParams();
+    const navigate = useNavigate();
+    const [isOpen, setIsOpen] = useState(false);
+    const [isActive, setIsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [checkResult, setCheckResult] = useState(false);
+    // const [electionActive, setElectionActive] = useState(false);
+    const [electionResult, setElectionResult] = useState([]);
+
+
+    const handleButtonChange = () => {
+        setIsOpen(!isOpen);
+        setIsActive(!isActive);
+    }
+
     const [electionDetails, setElectionDetails] = useState({
         electionTitle: '',
         startDate: '',
         endDate: '',
         description: ''
     });
-    const [electionResult, setElectionResult] = useState([]);
 
-    const navigate = useNavigate();
-
-    
     const fetchElectionResult = useCallback(async () => {
         const accessToken = localStorage.getItem('accessToken');
         if (!accessToken) {
@@ -33,7 +40,7 @@ export default function LastPage() {
         console.log(accessToken)
 
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${id}/candidate_votes/result`, {
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/election/${id}/candidate_votes`, {
                 headers: { Authorization: `Bearer ${accessToken}` },
             });
 
@@ -73,15 +80,19 @@ export default function LastPage() {
             clearInterval(intervalId);
         }
     }, [fetchElectionResult, electionDetails.startDate]);
-
-    const handleCheckResult = async () => {
-        setCheckResult(!checkResult);
-    }
-
+    
+    
     const fetchElectionData = useCallback(async () => {
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            // Optionally handle the missing token scenario
+            return;
+        }
         try {
             setIsLoading(true);
-            const response = await axios.get(`http://127.0.0.1:5000/onvote/get_election/${id}`);
+            const response = await axios.get(`http://127.0.0.1:5000/onvote/get_election/${id}`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
             if (response.status === 200 && response.data.message) {
             setElectionDetails({
                 electionTitle: response.data.message.title,
@@ -103,17 +114,46 @@ export default function LastPage() {
         }
     }, [id, navigate]);
 
+    // const checkElectionActive = useCallback(() => {
+    //     const currentDate = new Date();
+    //     const startDate = new Date(electionDetails.startDate);
+    //     const endDate = new Date(electionDetails.endDate);
+    //     return currentDate >= startDate && currentDate <= endDate;
+    // }, [electionDetails.startDate, electionDetails.endDate]);
+
+    // useEffect(() => {
+    //     setElectionActive(checkElectionActive());
+    // }, [checkElectionActive]);
+    
     useEffect(() => {
-        fetchElectionData();
+     fetchElectionData();
     }, [fetchElectionData]);
+  
+  return (
+    <>
+        <div>
+            <div className={`fixed left-0 top-0 w-[12rem] h-full shadow-md transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 lg:block`}>
+                <Sidebar id={id} />
+            </div>
+            <div className={`whitespace-nowrap duration-300 ease-in-out ${isOpen ? "ml-[12rem]": "ml-0"} md:ml-[12rem]`}>
+                <div className={`sticky top-0 bg-[#fff] flex whitespace-nowrap w-[100%] gap-[0.2rem] items-center border border-l-0 border-r-0 border-t-0 `}>
+                    <div className={`flex lg:hidden justify-center items-center w-[5%] px-[1.5rem] py-[1rem] border border-l-0 border-t-0 border-b-0 ${isActive ? 'bg-[#f2f2f2]' : 'bg-[#f6f8fa]'}`}>
+                        <button 
+                        onClick={handleButtonChange}
+                        className={``}
+                    >
+                        <GiHamburgerMenu />
+                        </button>
+                    </div>
+                    <div className=" font-bold px-[1rem] py-[1rem]">{electionDetails.electionTitle || "Election Name"}</div>
+                </div>
+                <div className="whitespace-nowrap">
+                    <div className="page-header sticky top-[3rem] bg-[#fff] flex items-center gap-3 p-[1rem] text-[1.2rem] border border-r-0 border-l-0 border-t-0 ">
+                        <div><FaDiceD20 /></div>
+                        Result
+                    </div>
 
-    return (
-        <>
-            <div className='px-6'>
-                <h3 className='text-center  text-[2rem] font-bold mt-3 text-blue-500'>{electionDetails.electionTitle}</h3>
-
-                {checkResult ? (
-                    electionResult && electionResult.length > 0 ? (
+                    {electionResult && electionResult.length > 0 ? (
                         electionResult.map((ballot) => {
                             const totalVotes = ballot.candidates.reduce((acc, candidate) => acc + candidate.votes, 0);
                             return (
@@ -134,45 +174,18 @@ export default function LastPage() {
                                 </div>
                             );
                         })
-                       
                     ) : (
-                        <p>Result is not available</p>
-                    )
-                ) : (
-                    <div className="flex flex-col justify-center items-center">
-                        <p className='text-center text-[.9rem] mt-4'>Thanks for submitting, click on the button below to view the results as the election is ongoing</p>
-
-                        <div className='flex mt-6'>
-                            <button onClick={() => {
-                                setTimeout(() => {
-                                    setCheckResult(true);
-                                    handleCheckResult();
-                                }, 1000);
-                                
-                                
-                            }} className='m-auto border bg-green-400 px-3 py-1 font-bold text-white'>Click here!!</button>
-                        </div>
-                    </div>
-                )}
-
-                <div className={`${checkResult ? 'block' : 'hidden'} flex`}>
-                    <button onClick={() => {
-                        setTimeout(() => {
-                            setCheckResult(false);
-                        }, 1000)
-                    }} className='m-auto border px-3 py-1'>Close</button>
+                        <p className="text-center">No results available</p>
+                    )}
                 </div>
-                
-
-                
-                
             </div>
+        </div>
+        <LoadingModal 
+            isOpen={isLoading}
+            onRequestClose={() => setIsLoading(!isLoading)}
+        />
 
-             <LoadingModal 
-                isOpen={isLoading}
-                onRequestClose={() => setIsLoading(!isLoading)}
-            />
-        </>
-        
-    )
+
+    </>
+  )
 }
