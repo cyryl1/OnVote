@@ -12,7 +12,7 @@ import Voters from './pages/voters';
 import Ballot from './pages/ballot.jsx';
 import VoterAuth from './pages/voterAuth.jsx';
 import VotePage from './pages/votePage.jsx';
-import LastPage from './pages/lastPage.jsx';
+import LastPage from './pages/lastpage.jsx';
 import ProfileSettings from './pages/profileSettings.jsx';
 import TokenRefresh from './pages/tokenRefresh.jsx';
 import PreviewPage from './pages/previewPage.jsx';
